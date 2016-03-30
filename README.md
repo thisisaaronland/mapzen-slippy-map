@@ -6,7 +6,7 @@ Mapzen maps. In a browser. Full-screen. With the ability to screenshot themselve
 
 ## Caveats
 
-This does do a _bunch_ of things that any normal map does, yet.
+This doesn't do a _bunch_ of things that any normal map does, yet.
 
 ## How to use this thing
 
