@@ -40,6 +40,7 @@ This will create a screenshot of the current map view and try to save it to the 
 * Search
 * Geolocation
 * Maybe GetLatLon style coordinate display? 
+* Screenshot controls for touch devices
 
 ## See also
 
