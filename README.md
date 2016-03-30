@@ -1,5 +1,7 @@
 # mapzen-slippy-map
 
+![Lisbon](images/mapzen-slippy-map-lisbon.png)
+
 Mapzen maps. In a browser. Full-screen. With the ability to screenshot themselves.
 
 ## Caveats
