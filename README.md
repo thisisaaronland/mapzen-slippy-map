@@ -24,6 +24,24 @@ This will launch a tiny little web server on `http://localhost:8080` where you c
 
 _Support for other operating systems isn't far behind._
 
+## Toggling between maps
+
+## Shift-B
+
+Load the `bubble-wrap` style.
+
+## Shift-C
+
+Load the `cinnabar` style.
+
+## Shift-R
+
+Load the `refill` style.
+
+## Shift-Z
+
+Load the `zinc` style.
+
 ## Screenshots
 
 ## Shift-S
@@ -33,6 +51,10 @@ This will create a screenshot of the current map view and open it up in another 
 ## Ctrl-Shift-S
 
 This will create a screenshot of the current map view and try to save it to the place your browser saves downloads.
+
+## Updating the map styles
+
+Run the handy `make mapzen` target in the included Makefile to update all map styles (and their assets) from source.
 
 ## Things that `mapzen-slippy-map` still needs to learn how to do
 

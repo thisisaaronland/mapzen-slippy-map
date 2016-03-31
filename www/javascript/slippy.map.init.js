@@ -1,6 +1,6 @@
 window.onload = function(e){	
 	
-	slippy.map.init('tangram/bubble-wrap/bubble-wrap.yaml');
+	slippy.map.init('bubble-wrap');
 	slippy.map.jumpto_latlon(37.755244,-122.453098, 12);
 
 	// please put this in a function or something
@@ -14,18 +14,28 @@ window.onload = function(e){
 		if (! event.shiftKey){
 			return;
 		}
-
+		
 		// console.log(key);
+
+		// sudo make the key commands a config thing-y in slippy.map.js
+		// (20160331/thisisaaronland)
+		
+		// B is for bubble-wrap
+		
+		if (key == 66){
+			slippy.map.load_style('bubble-wrap');
+		}	
+
+		// C is for cinnabar
+
+		if (key == 67){
+			slippy.map.load_style('cinnabar');
+		}
 		
 		// R is for refill
 
 		if (key == 82){
-
-			// this does not work (20160330/thisisaaronland)
-			
-			var scene = slippy.map.scene();
-			scene.config_source = "tangram/refill/refill.yaml";
-			scene.updateConfig({ rebuild: true }).then(function() {  });
+			slippy.map.load_style('refill');
 		}	
 		
 		// S is for screenshot
@@ -45,6 +55,12 @@ window.onload = function(e){
 				alert("Oh no! There was a problem trying to create your screenshot...");
 				console.log(e);
 			}
+		}
+
+		// Z is for zinc
+
+		if (key == 90){
+			slippy.map.load_style('zinc');
 		}
 	}
 	
