@@ -64,6 +64,8 @@ slippy.map = (function(){
 				
 				var map = L.map(id);
 				// map.scrollWheelZoom.disable();
+
+				var hash = new L.Hash(map);
 				
 				var tangram = self.tangram();
 				tangram.addTo(map);
