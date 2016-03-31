@@ -139,6 +139,9 @@ slippy.map = (function(){
 				console.log("missing 'saveAs' controls");
 				return false
 			}
+
+			var map = self.map();
+			var bounds = map.getBounds();
 			
 			// TODO - get bounding box and make geohashes out of SW/NE
 			// and append to name (20160330/thisisaaronland)
