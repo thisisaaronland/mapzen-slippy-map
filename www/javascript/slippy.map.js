@@ -69,7 +69,6 @@ slippy.map = (function(){
 			'tangram': function(scene){
 
 				var scene = self.scenefile();
-				console.log("HI " + scene);
 				
 				var tangram = Tangram.leafletLayer({
 						scene: scene,
@@ -79,7 +78,6 @@ slippy.map = (function(){
 						// attribution: attribution,
 					});
 				
-				console.log(tangram);
 				return tangram;
 			},
 
