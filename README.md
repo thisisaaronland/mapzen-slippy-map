@@ -24,7 +24,7 @@ This will launch a tiny little web server on `http://localhost:8080` where you c
 
 _Support for other operating systems isn't far behind._
 
-## Toggling between maps
+## Toggling between map styles
 
 ## Shift-B
 
