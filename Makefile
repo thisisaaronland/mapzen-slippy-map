@@ -1,3 +1,5 @@
+all: mapzen screenful
+
 mapzen: tangram refill bubble-wrap cinnabar zinc
 
 tangram:
@@ -31,3 +33,9 @@ zinc:
 	curl -s -o www/tangram/zinc/building-grid.gif https://raw.githubusercontent.com/tangrams/zinc-style/gh-pages/images/building-grid.gif
 	perl -p -i -e "s/images\/poi_icons_18\@2x.png/poi_icons_18\\@2x.png/" www/tangram/zinc/zinc.yaml
 	perl -p -i -e "s/images\/building-grid.gif/building-grid.gif/" www/tangram/zinc/zinc.yaml
+
+screenfull:
+        if test -e www/javascript/screenfull.js; then cp www/javascript/screenfull.js www/javascript/screenfull.js.bak; fi
+        if test -e www/javascript/screenfull.min.js; then cp www/javascript/screenfull.min.js www/javascript/screenfull.min.js.bak; fi
+        curl -s -o www/javascript/screenfull.min.js https://raw.githubusercontent.com/sindresorhus/screenfull.js/gh-pages/dist/screenfull.min.js
+        curl -s -o www/javascript/screenfull.js https://raw.githubusercontent.com/sindresorhus/screenfull.js/gh-pages/dist/screenfull.js
