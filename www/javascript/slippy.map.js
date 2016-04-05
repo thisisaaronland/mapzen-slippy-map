@@ -150,8 +150,16 @@ slippy.map = (function(){
 			ne_geohash = encodeGeoHash(ne['lat'], ne['lng']);			
 
 			var geohash = sw_geohash + '-' + ne_geohash;
+
+			var ts = (+new Date());
+			ts = parseInt(ts / 1000);
+
+			var style = _current_style;
 			
-			var fname = 'slippy-map-' + (+new Date()) + '-' + geohash + '.png';
+			var fname = ['slippy-map', style, ts, geohash];
+			fname = fname.join('-');
+			
+			fname += '.png';
 			
 			var callback = function(sh){					
 				saveAs(sh.blob, fname);
