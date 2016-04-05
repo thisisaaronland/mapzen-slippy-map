@@ -20,6 +20,7 @@ slippy.map = (function(){
 
 		'init': function(style){
 
+			console.log("HI");
 			_current_style = style;
 			
 			window.onresize = self.resize;
@@ -94,21 +95,27 @@ slippy.map = (function(){
 		
 		'load_style': function(style){
 
-			if (style == _current_style){
-				return;
-			}
-
 			document.cookie = "style=" + style;
+			document.cookie = "labels=" + _labels;
 			
 			var scene = slippy.map.scene();
-			var sfile = self.scenefile(style)
+			var sfile = self.scenefile(style, _labels)
 			scene.load(sfile);
 
 			_current_style = style;
 		},
 			
-		'scenefile': function(style){
-			return _styles[style];
+		'scenefile': function(style, labels){
+
+			// dirty... but it works...
+			
+			var file = _styles[style];
+
+			if ((! labels) && (style != 'bubble-wrap')){
+				file = file.replace(".yaml", "-no-labels.yaml");
+			}
+
+			return file;
 		},
 		
 		'scene': function(){
@@ -227,7 +234,7 @@ slippy.map = (function(){
 
 			if (key == 76){
 				_labels = (_labels) ? false : true;
-				// reload here...
+				slippy.map.load_style(_current_style);
 			}
 			
 			// R is for refill

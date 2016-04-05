@@ -42,6 +42,10 @@ Load the `bubble-wrap` style.
 
 Load the `cinnabar` style.
 
+## Shift-L
+
+Toggles between labeled and unlabeled versions of the current style. _This does not apply to the `bubble-wrap` style.
+
 ## Shift-R
 
 Load the `refill` style.
