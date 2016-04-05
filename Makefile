@@ -1,3 +1,5 @@
+UNAME := $(shell sh -c 'uname -s  | awk "{print tolower($0)}" 2>/dev/null || echo not')
+
 all: mapzen screenful
 
 mapzen: tangram refill bubble-wrap cinnabar zinc
@@ -43,5 +45,6 @@ screenfull:
 	curl -s -o www/javascript/screenfull.min.js https://raw.githubusercontent.com/sindresorhus/screenfull.js/gh-pages/dist/screenfull.min.js
 	curl -s -o www/javascript/screenfull.js https://raw.githubusercontent.com/sindresorhus/screenfull.js/gh-pages/dist/screenfull.js
 
-osx:
-	utils/osx/www-server -path www
+slippy:
+	if test ! -e utils/$(UNAME)/www-server; then echo "missing build for $(UNAME)"; exit 1; fi
+	./utils/$(UNAME)/www-server -path ./www

@@ -10,19 +10,27 @@ This doesn't do a _bunch_ of things that any normal map does, yet.
 
 ## How to use this thing
 
-Put it on a web server. Or:
+Put it on a web server. Or: Use the handy `slippy` target in the included Makefile.
 
-### On a Mac:
+Like this:
 
 ```
-./utils/osx/www-server -path www
+make slippy
 ```
 
-This will launch a tiny little web server on `http://localhost:8080` where you can see the map.
+This will start a small local web server that you can visit in your web browser by going to `http://localhost:8080`
 
-### Not on a Mac
+If you don't know what a "Makefile" is or don't make the `make` program installed on your computer you can start `mapzen-slippy-map` by hand, from the command-line, like this:
 
-_Support for other operating systems isn't far behind._
+```
+./utils/PLATFORM/www-server -path ./www
+```
+
+Where `PLATFORM` should be one of the following:
+
+* darwin (as in Mac OS X)
+* linux
+* windows
 
 ## Toggling between map styles
 
