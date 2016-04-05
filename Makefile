@@ -10,6 +10,7 @@ tangram:
 
 refill:
 	curl -s -o www/tangram/refill/refill.yaml https://raw.githubusercontent.com/tangrams/refill-style/gh-pages/refill-style.yaml
+	curl -s -o www/tangram/refill/refill-no-labels.yaml https://raw.githubusercontent.com/tangrams/refill-style-no-labels/gh-pages/refill-style-no-labels.yaml
 	curl -s -o www/tangram/refill/poi_icons_18@2x.png https://raw.githubusercontent.com/tangrams/refill-style/gh-pages/images/poi_icons_18%402x.png
 	curl -s -o www/tangram/refill/building-grid.gif https://raw.githubusercontent.com/tangrams/refill-style/gh-pages/images/building-grid.gif
 	perl -p -i -e "s/images\/poi_icons_18\@2x.png/poi_icons_18\\@2x.png/" www/tangram/refill/refill.yaml
@@ -24,6 +25,7 @@ bubble-wrap:
 
 cinnabar:
 	curl -s -o www/tangram/cinnabar/cinnabar.yaml https://raw.githubusercontent.com/tangrams/cinnabar-style/gh-pages/cinnabar-style.yaml
+	curl -s -o www/tangram/cinnabar/cinnabar-no-labels.yaml https://raw.githubusercontent.com/tangrams/cinnabar-style-no-labels/gh-pages/cinnabar-style-no-labels.yaml
 	curl -s -o www/tangram/cinnabar/poi_icons_18@2x.png https://raw.githubusercontent.com/tangrams/cinnabar-style/gh-pages/images/poi_icons_18%402x.png
 	curl -s -o www/tangram/cinnabar/building-grid.gif https://raw.githubusercontent.com/tangrams/cinnabar-style/gh-pages/images/building-grid.gif
 	perl -p -i -e "s/images\/poi_icons_18\@2x.png/poi_icons_18\\@2x.png/" www/tangram/cinnabar/cinnabar.yaml
@@ -31,6 +33,7 @@ cinnabar:
 
 zinc:
 	curl -s -o www/tangram/zinc/zinc.yaml https://raw.githubusercontent.com/tangrams/zinc-style/gh-pages/zinc-style.yaml
+	curl -s -o www/tangram/zinc/zinc-no-labels.yaml https://raw.githubusercontent.com/tangrams/zinc-style-no-labels/gh-pages/zinc-style-no-labels.yaml
 	curl -s -o www/tangram/zinc/poi_icons_18@2x.png https://raw.githubusercontent.com/tangrams/zinc-style/gh-pages/images/poi_icons_18%402x.png
 	curl -s -o www/tangram/zinc/building-grid.gif https://raw.githubusercontent.com/tangrams/zinc-style/gh-pages/images/building-grid.gif
 	perl -p -i -e "s/images\/poi_icons_18\@2x.png/poi_icons_18\\@2x.png/" www/tangram/zinc/zinc.yaml

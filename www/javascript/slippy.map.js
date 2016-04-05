@@ -7,6 +7,7 @@ slippy.map = (function(){
 	var _mapid = 'map';
 
 	var _current_style = 'bubble-wrap';
+	var _labels = true;
 	
 	var _styles = {
 		'bubble-wrap': 'tangram/bubble-wrap/bubble-wrap.yaml',
@@ -198,7 +199,7 @@ slippy.map = (function(){
 				return;
 			}
 			
-			// console.log(key);
+			console.log(key);
 
 			// sudo make the key commands a config thing-y in slippy.map.js
 			// (20160331/thisisaaronland)
@@ -220,6 +221,13 @@ slippy.map = (function(){
 
 			if (key == 'F'){
 
+			}
+
+			// L is for toggle between labels and no labels
+
+			if (key == 76){
+				_labels = (_labels) ? false : true;
+				// reload here...
 			}
 			
 			// R is for refill
