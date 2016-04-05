@@ -96,6 +96,8 @@ slippy.map = (function(){
 			if (style == _current_style){
 				return;
 			}
+
+			document.cookie = "style=" + style;
 			
 			var scene = slippy.map.scene();
 			var sfile = self.scenefile(style)
