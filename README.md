@@ -60,7 +60,6 @@ Run the handy `make mapzen` target in the included Makefile to update all map st
 
 ## Things that `mapzen-slippy-map` still needs to learn how to do
 
-* Toggle map styles
 * Search
 * Geolocation
 * Maybe GetLatLon style coordinate display? 
