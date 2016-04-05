@@ -142,11 +142,16 @@ slippy.map = (function(){
 
 			var map = self.map();
 			var bounds = map.getBounds();
+
+			var sw = bounds.getSouthWest();
+			var ne = bounds.getNorthEast();			
 			
-			// TODO - get bounding box and make geohashes out of SW/NE
-			// and append to name (20160330/thisisaaronland)
-				
-			var fname = 'slippy-map-' + (+new Date()) + '.png';
+			sw_geohash = encodeGeoHash(sw['lat'], sw['lng']);
+			ne_geohash = encodeGeoHash(ne['lat'], ne['lng']);			
+
+			var geohash = sw_geohash + '-' + ne_geohash;
+			
+			var fname = 'slippy-map-' + (+new Date()) + '-' + geohash + '.png';
 			
 			var callback = function(sh){					
 				saveAs(sh.blob, fname);
