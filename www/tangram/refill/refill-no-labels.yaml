@@ -213,7 +213,7 @@ settings:
 
 textures:
     pois:
-        url: images/poi_icons_18@2x.png
+        url: poi_icons_18@2x.png
         filtering: mipmap
         sprites:
             # define sprites: [x origin, y origin, width, height]
@@ -362,7 +362,7 @@ textures:
             zoo: [966, 84, 38, 38]
 
     building-grid:
-        url: images/building-grid.gif
+        url: building-grid.gif
         filtering: mipmap
 
 sources:

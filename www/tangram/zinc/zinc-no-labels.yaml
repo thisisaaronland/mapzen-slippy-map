@@ -237,7 +237,7 @@ zinc-light-gray-colors:
 
 textures:
     pois:
-        url: images/poi_icons_18@2x.png
+        url: poi_icons_18@2x.png
         filtering: mipmap
         sprites:
             # define sprites: [x origin, y origin, width, height]

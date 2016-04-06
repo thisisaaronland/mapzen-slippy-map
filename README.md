@@ -2,6 +2,8 @@
 
 ![Lisbon](images/mapzen-slippy-map-lisbon.png)
 
+![Moscow](images/slippy-map-refill-1459901070-ucftpmpg0vru-ucfv2b901vzu.png)
+
 Mapzen maps. In a browser. Full-screen. With the ability to screenshot themselves.
 
 ## Caveats
@@ -44,7 +46,7 @@ Load the `cinnabar` style.
 
 ## Shift-L
 
-Toggles between labeled and unlabeled versions of the current style. _This does not apply to the `bubble-wrap` style.
+Toggles between labeled and unlabeled versions of the current style. _This is still a bit clunky and does not apply to the `bubble-wrap` style._
 
 ## Shift-R
 
