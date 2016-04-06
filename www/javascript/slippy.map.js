@@ -2,8 +2,7 @@ var slippy = slippy || {};
 
 slippy.map = (function(){
 
-		var _cache = {}
-
+	var _cache = {}
 	var _mapid = 'map';
 
 	var _current_style = 'bubble-wrap';
@@ -20,7 +19,6 @@ slippy.map = (function(){
 
 		'init': function(style){
 
-			console.log("HI");
 			_current_style = style;
 			
 			window.onresize = self.resize;
@@ -74,7 +72,7 @@ slippy.map = (function(){
 				
 				_cache[id] = map;
 			}
-			
+
 			return _cache[id];
 		},
 		
@@ -107,14 +105,15 @@ slippy.map = (function(){
 			
 		'scenefile': function(style, labels){
 
-			// dirty... but it works...
+			// everything about this is kind of wrong... but it works...
 			
 			var file = _styles[style];
 
-			if ((! labels) && (style != 'bubble-wrap')){
+			if ((! _labels) && (style != 'bubble-wrap')){
 				file = file.replace(".yaml", "-no-labels.yaml");
 			}
 
+			// console.log("scenefile " + file + " - " + _labels);
 			return file;
 		},
 		
@@ -246,6 +245,12 @@ slippy.map = (function(){
 			// S is for screenshot
 			
 			if (key == 83){
+
+				var wandering = slippy.map.wander.enabled();
+
+				if (wandering){
+					slippy.map.wander.stop();
+				}
 				
 				try {
 					if (! event.ctrlKey){
@@ -260,6 +265,18 @@ slippy.map = (function(){
 					alert("Oh no! There was a problem trying to create your screenshot...");
 					console.log(e);
 				}
+
+				if (wandering){
+					slippy.map.wander.start();
+				}
+
+			}
+
+			// W is for wander
+
+			if (key == 87){
+
+				slippy.map.wander.toggle();
 			}
 			
 			// Z is for zinc

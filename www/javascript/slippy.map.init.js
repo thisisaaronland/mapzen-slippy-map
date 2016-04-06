@@ -44,10 +44,10 @@ window.onload = function(e){
 	
 	// go!
 	
-	slippy.map.init(style);
-	window.onkeydown = slippy.map.onkeyboard;
-	
+	var map = slippy.map.init(style);
 	slippy.map.jumpto_latlon(lat, lon, zoom);
 	
+	slippy.map.wander.init(map);
 	
+	window.onkeydown = slippy.map.onkeyboard;
 }
