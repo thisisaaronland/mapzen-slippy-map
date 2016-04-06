@@ -18,7 +18,7 @@ Like this:
 make slippy
 ```
 
-This will start a small local web server that you can visit in your web browser by going to `http://localhost:8080`
+This will start a small [local web server](https://github.com/whosonfirst/go-whosonfirst-fileserver) that you can visit in your web browser by going to `http://localhost:8080`
 
 If you don't know what a "Makefile" is or don't make the `make` program installed on your computer you can start `mapzen-slippy-map` by hand, from the command-line, like this:
 
