@@ -1,7 +1,5 @@
 # mapzen-slippy-map
 
-![Lisbon](images/mapzen-slippy-map-lisbon.png)
-
 ![Moscow](images/slippy-map-refill-1459901070-ucftpmpg0vru-ucfv2b901vzu.png)
 
 Mapzen maps. In a browser. Full-screen. With the ability to screenshot themselves.
