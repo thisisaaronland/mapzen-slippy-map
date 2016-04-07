@@ -32,7 +32,7 @@ Where `PLATFORM` should be one of the following:
 * linux
 * windows
 
-## Toggling between map styles
+## Keyboard controls
 
 ## Shift-B
 

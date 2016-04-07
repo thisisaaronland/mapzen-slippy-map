@@ -18,7 +18,12 @@ window.onload = function(e){
 	
 	for (var i=0; i < cookie_count; i++){
 
-		var cookie = cookie_pairs[i]
+		var cookie = cookie_pairs[i];
+		
+		if (! cookie){
+			continue;
+		}
+
 		cookie = cookie.split("=");
 
 		var k = cookie[0].trim();
