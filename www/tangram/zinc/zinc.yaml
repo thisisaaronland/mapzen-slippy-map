@@ -52,6 +52,7 @@ labels-global:
     - &text_visible_shields           true
     - &text_visible_exits             true
     - &text_visible_exits_e           false
+    - &text_visible_airport_gate      true
 
 zinc-light-gray-colors:
     cameras:
@@ -4242,7 +4243,7 @@ layers:
             icons:
                 visible: false
             text-blend-order:
-                visible: true
+                visible: *text_visible_airport_gate
                 interactive: true
                 text_source: ref
                 font:
