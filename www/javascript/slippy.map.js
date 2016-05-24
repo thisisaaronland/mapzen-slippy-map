@@ -219,12 +219,52 @@ slippy.map = (function(){
 			var key = event.keyCode || event.which;
 			var keychar = String.fromCharCode(key);
 
+			// console.log(event);
+
+			// https://en.wikipedia.org/wiki/Arrow_keys
+			
+			if (! event.shiftKey){			
+
+				var map = self.map();
+				var pixels = 75;
+
+				var opts = {
+					animate: true,
+						
+				}
+				// left – A; left-arrow
+				
+				if ((key == 65) || (key == 37)) {
+					pixels = -pixels
+					map.panBy([pixels, 0], opts)
+				}
+
+				// right – D; right-arrow
+				
+				if ((key == 68) || (key == 39)) {
+					map.panBy([pixels, 0], opts)
+				}
+
+				// up – W; up-arrow
+
+				if ((key == 87) || (key == 38)){
+					pixels = -pixels
+					map.panBy([0, pixels], opts)
+				}
+
+				// down - S; down-arrow
+				
+				if ((key == 83) || (key == 40)){
+					map.panBy([0, pixels], opts)
+				}
+
+				return;
+			}
+		
 			if (! event.shiftKey){
 				return;
 			}
 			
-			console.log(key);
-
 			// sudo make the key commands a config thing-y in slippy.map.js
 			// (20160331/thisisaaronland)
 			

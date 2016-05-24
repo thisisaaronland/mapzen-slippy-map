@@ -34,6 +34,12 @@ Where `PLATFORM` should be one of the following:
 
 ## Keyboard controls
 
+## WASD
+
+`slippy-map` supports the [WASD key configuration](https://en.wikipedia.org/wiki/Arrow_keys#WASD_keys) for panning the map. `W` will move the map upwards, `S` downwards. `A` will move the map to the left and `D` to the right.
+
+The standard keyboard arrow keys are also supported and pan the map in a direction corresponding the key being pressed.
+
 ## Shift-B
 
 Load the `bubble-wrap` style.
