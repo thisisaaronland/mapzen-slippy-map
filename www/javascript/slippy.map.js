@@ -12,6 +12,7 @@ slippy.map = (function(){
 	var _styles = {
 		'bubble-wrap': 'tangram/bubble-wrap/bubble-wrap.yaml',
 		'cinnabar': 'tangram/cinnabar/cinnabar.yaml',
+		'outdoor': 'tangram/outdoor/outdoor.yaml',		
 		'refill': 'tangram/refill/refill.yaml',
 		'zinc': 'tangram/zinc/zinc.yaml',
 	};
@@ -20,7 +21,6 @@ slippy.map = (function(){
 
 		'init': function(style){
 
-			console.log("HI");
 			_current_style = style;
 			
 			window.onresize = self.resize;
@@ -108,11 +108,22 @@ slippy.map = (function(){
 		'scenefile': function(style, labels){
 
 			// dirty... but it works...
-			
+
 			var file = _styles[style];
 
-			if ((! labels) && (style != 'bubble-wrap')){
-				file = file.replace(".yaml", "-no-labels.yaml");
+			if (! labels){
+
+				if (style == 'bubble-wrap'){
+					// pass
+				}
+
+				else if (style == 'outdoor'){
+					// pass
+				}
+
+				else {
+					file = file.replace(".yaml", "-no-labels.yaml");
+				}
 			}
 
 			return file;
@@ -161,12 +172,18 @@ slippy.map = (function(){
 
 			var geohash = sw_geohash + '-' + ne_geohash;
 
-			var ts = (+new Date());
-			ts = parseInt(ts / 1000);
+			// var ts = (+new Date());
+			// ts = parseInt(ts / 1000);
 
+			var dt = new Date();
+			var iso = dt.toISOString();
+			var iso = iso.split('T');
+			var ymd = iso[0];
+			ymd = ymd.replace("-", "", "g")
+			
 			var style = _current_style;
 			
-			var fname = ['slippy-map', style, ts, geohash];
+			var fname = ['slippy-map', ymd, style, geohash];
 			fname = fname.join('-');
 			
 			fname += '.png';
@@ -236,6 +253,12 @@ slippy.map = (function(){
 				_labels = (_labels) ? false : true;
 				slippy.map.load_style(_current_style);
 			}
+
+			// O is for outdoor
+
+			if (key == 79){
+				slippy.map.load_style('outdoor');
+			}	
 			
 			// R is for refill
 			
