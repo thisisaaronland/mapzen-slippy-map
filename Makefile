@@ -21,7 +21,9 @@ refill:
 outdoor:
 	curl -s -o www/tangram/outdoor/outdoor.yaml https://raw.githubusercontent.com/tangrams/outdoor-style/gh-pages/outdoor-style.yaml
 	curl -s -o www/tangram/outdoor/poi_icons_18@2x.png https://raw.githubusercontent.com/tangrams/outdoor-style/gh-pages/images/poi_icons_18%402x.png
+	curl -s -o www/tangram/outdoor/draw-test8.jpg https://raw.githubusercontent.com/tangrams/outdoor-style/gh-pages/images/draw-test8.jpg
 	perl -p -i -e "s/images\/poi_icons_18\@2x.png/poi_icons_18\\@2x.png/" www/tangram/outdoor/outdoor.yaml
+	perl -p -i -e "s/images\/draw-test8.jpg/draw-test8.jpg/" www/tangram/outdoor/outdoor.yaml
 
 bubble-wrap:
 	curl -s -o www/tangram/bubble-wrap/bubble-wrap.yaml https://raw.githubusercontent.com/tangrams/bubble-wrap/gh-pages/bubble-wrap.yaml
