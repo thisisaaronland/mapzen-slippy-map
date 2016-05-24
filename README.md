@@ -46,6 +46,10 @@ Load the `cinnabar` style.
 
 Toggles between labeled and unlabeled versions of the current style. _This is still a bit clunky and does not apply to the `bubble-wrap` style._
 
+## Shift-O
+
+Load the `outdoor` style.
+
 ## Shift-R
 
 Load the `refill` style.
@@ -64,7 +68,7 @@ This will create a screenshot of the current map view and open it up in another 
 
 This will create a screenshot of the current map view and try to save it to the place your browser saves downloads. Filenames are generated as follows:
 
-"slippy-map-" + `MAP STYLE` + "-" + `UNIX TIMESTAMP` + "-" `GEOHASH(SW lat,lon)` + "-" + `GEOHASH(NE lat,lon)` + ".png"
+"slippy-map-" + `MAP STYLE` + "-" + `YEARMONTHDAY` + "-" `GEOHASH(SW lat,lon)` + "-" + `GEOHASH(NE lat,lon)` + ".png"
 
 ## Updating the map styles
 
