@@ -50,7 +50,7 @@ Load the `cinnabar` style.
 
 ## Shift-L
 
-Toggles between labeled and unlabeled versions of the current style. _This is still a bit clunky and does not apply to the `bubble-wrap` style._
+Toggles between labeled and unlabeled versions of the current style. _This is still a bit clunky and does not apply to the `bubble-wrap` or the `outdoor` styles._
 
 ## Shift-O
 
