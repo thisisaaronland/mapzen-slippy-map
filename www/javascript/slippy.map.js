@@ -2,7 +2,7 @@ var slippy = slippy || {};
 
 slippy.map = (function(){
 
-		var _cache = {}
+	var _cache = {}
 
 	var _mapid = 'map';
 
@@ -16,6 +16,9 @@ slippy.map = (function(){
 		'refill': 'tangram/refill/refill.yaml',
 		'zinc': 'tangram/zinc/zinc.yaml',
 	};
+
+	var _proxy_tiles = true;
+	var _proxy_host = location.protocol + "//" + location.host;
 	
 	var self = {
 
@@ -77,6 +80,8 @@ slippy.map = (function(){
 			
 			return _cache[id];
 		},
+
+		// https://mapzen.com/documentation/tangram/
 		
 		'tangram': function(scene){
 			
@@ -88,6 +93,18 @@ slippy.map = (function(){
 				unloadInvisibleTiles: false,
 				updateWhenIdle: false,
 				// attribution: attribution,
+			});
+
+			var scene = tangram.scene;
+			
+			scene.subscribe({
+				
+				load: function (scene){
+
+					if (_proxy_tiles == true){
+						slippy.map.setup_proxy(scene);
+					}
+				}
 			});
 			
 			return tangram;
@@ -104,7 +121,23 @@ slippy.map = (function(){
 
 			_current_style = style;
 		},
+
+		'setup_proxy': function(scene){
+
+			if (! scene){
+				scene = slippy.map.scene();
+			}
 			
+			for (var src in scene.config.sources){
+				var cfg = scene.config.sources[src]
+				var url = cfg.url.replace('https://vector.mapzen.com', _proxy_host)
+
+				cfg['url'] = url				
+				scene.config.sources[src] = cfg
+			}
+			
+		},
+		
 		'scenefile': function(style, labels){
 
 			// dirty... but it works...
