@@ -1,17 +1,16 @@
 package main
 
 import (
-        "encoding/json"
 	"flag"
 	"fmt"
 	"github.com/thisisaaronland/go-slippy-tiles"
-	"github.com/thisisaaronland/go-slippy-tiles/provider"	
+	"github.com/thisisaaronland/go-slippy-tiles/provider"
 	"github.com/whosonfirst/go-httpony/cors"
 	"github.com/whosonfirst/go-httpony/tls"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 )
 
 func main() {
@@ -24,9 +23,9 @@ func main() {
 	var tls_enable = flag.Bool("tls", false, "Serve requests over TLS") // because CA warnings in browsers...
 	var tls_cert = flag.String("tls-cert", "", "Path to an existing TLS certificate. If absent a self-signed certificate will be generated.")
 	var tls_key = flag.String("tls-key", "", "Path to an existing TLS key. If absent a self-signed key will be generated.")
-	var proxy_tiles = flag.Bool("proxy", false, "")
-	var proxy_config = flag.String("proxy-config", "", "")	
-	
+	var proxy_tiles = flag.Bool("proxy", false, "Proxy and cache tiles locally.")
+	var proxy_config = flag.String("proxy-config", "", "Path to a valid config file for slippy tiles.")
+
 	flag.Parse()
 
 	docroot, err := filepath.Abs(*path)
@@ -39,49 +38,42 @@ func main() {
 
 	root := http.Dir(docroot)
 	fs := http.FileServer(root)
-	
+
 	handler := cors.EnsureCORSHandler(fs, *cors_enable, *cors_allow)
 
 	if *proxy_tiles {
 
-	       body, err := ioutil.ReadFile(*proxy_config)
-
-	       if err != nil {
-      	       	  panic(err)
-	        }
-		
-	   	config := slippytiles.Config{}
-		err = json.Unmarshal(body, &config)
+	   	config, err := slippytiles.NewConfigFromFile(*proxy_config)
 
 		if err != nil {
-		   panic(err)
+			panic(err)
 		}
 
 		provider, err := provider.NewProviderFromConfig(config)
-		fmt.Println(provider)
-		
+
 		if err != nil {
-		   panic(err)
+			panic(err)
 		}
 
-		proxy := func(next http.Handler) http.Handler {
+		re, _ := regexp.Compile(`/(.*)/(\d+)/(\d+)/(\d+).(\w+)$`)
 
-		    fn := func(rsp http.ResponseWriter, req *http.Request) {
+		juggler := func(rsp http.ResponseWriter, req *http.Request) {
 
-		       url := req.URL
-		       path := url.Path
+			url := req.URL
+			path := url.Path
 
-		       if path == "" {
-		       	  fmt.Println(path)
-		       }
-		       
-		       next.ServeHTTP(rsp, req)
-		    }
+			if re.MatchString(path) {
+				handler := provider.Handler()
+				handler.ServeHTTP(rsp, req)
+				return
+			}
 
-		    return http.HandlerFunc(fn)
+			fs.ServeHTTP(rsp, req)
 		}
 
-		handler = cors.EnsureCORSHandler(proxy(fs), *cors_enable, *cors_allow)
+		proxy := http.HandlerFunc(juggler)
+
+		handler = cors.EnsureCORSHandler(proxy, *cors_enable, *cors_allow)
 	}
 
 	if *tls_enable {
@@ -91,14 +83,14 @@ func main() {
 
 		if *tls_cert == "" && *tls_key == "" {
 
-		   	root, err := tls.EnsureTLSRoot()
+			root, err := tls.EnsureTLSRoot()
 
 			if err != nil {
 				panic(err)
 			}
-			
+
 			cert, key, err = tls.GenerateTLSCert(*host, root)
-			
+
 			if err != nil {
 				panic(err)
 			}
@@ -110,14 +102,14 @@ func main() {
 
 		fmt.Printf("start and listen for requests at https://%s\n", endpoint)
 		err = http.ListenAndServeTLS(endpoint, cert, key, handler)
-		
+
 	} else {
-	
+
 		fmt.Printf("start and listen for requests at http://%s\n", endpoint)
 		err = http.ListenAndServe(endpoint, handler)
 	}
 
-	if err != nil {	
+	if err != nil {
 		panic(err)
 	}
 
