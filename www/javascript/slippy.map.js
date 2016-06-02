@@ -17,8 +17,8 @@ slippy.map = (function(){
 		'zinc': 'tangram/zinc/zinc.yaml',
 	};
 
-	var _proxy_tiles = true;
-	var _proxy_host = location.protocol + "//" + location.host;
+	var _proxy_enabled = true;
+	var _proxy_endpoint = location.protocol + "//" + location.host;
 	
 	var self = {
 
@@ -99,17 +99,37 @@ slippy.map = (function(){
 			
 			scene.subscribe({
 				
-				load: function (scene){
+				load: function(scene){
 
-					if (_proxy_tiles == true){
-						slippy.map.setup_proxy(scene);
+					if (slippy.map.proxy_enabled()){
+						slippy.map.enable_proxy(scene);
 					}
+				},
+
+				view_complete: function(){
+					// console.log('scene view complete');
 				}
 			});
 			
 			return tangram;
 		},
-		
+
+		'enable_proxy': function(scene){
+
+			if (! scene){
+				scene = slippy.map.scene();
+			}
+			
+			for (var src in scene.config.sources){
+				var cfg = scene.config.sources[src]
+				var url = cfg.url.replace('https://vector.mapzen.com', slippy.map.proxy_endpoint())
+
+				cfg['url'] = url				
+				scene.config.sources[src] = cfg
+			}
+			
+		},
+
 		'load_style': function(style){
 
 			document.cookie = "style=" + style;
@@ -122,22 +142,6 @@ slippy.map = (function(){
 			_current_style = style;
 		},
 
-		'setup_proxy': function(scene){
-
-			if (! scene){
-				scene = slippy.map.scene();
-			}
-			
-			for (var src in scene.config.sources){
-				var cfg = scene.config.sources[src]
-				var url = cfg.url.replace('https://vector.mapzen.com', _proxy_host)
-
-				cfg['url'] = url				
-				scene.config.sources[src] = cfg
-			}
-			
-		},
-		
 		'scenefile': function(style, labels){
 
 			// dirty... but it works...
@@ -364,7 +368,33 @@ slippy.map = (function(){
 				slippy.map.load_style('zinc');
 			}
 		},
-		
+
+		'proxy_enabled': function(bool){
+
+			if (typeof(bool) != 'undefined'){
+
+				bool = (bool) ? true : false
+
+				if (bool != _proxy_enabled){
+					_proxy_enabled = bool;
+
+					if (bool){
+						self.enable_proxy();
+					}
+				}
+			}
+
+			return _proxy_enabled;
+		},
+
+		'proxy_endpoint': function(endpoint){
+
+			if (endpoint){
+				_proxy_endpoint = endpoint;
+			}
+
+			return _proxy_endpoint;
+		},
 	};
 	
 	return self
