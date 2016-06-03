@@ -606,7 +606,7 @@ styles:
     #     shaders:
     #         uniforms:
     #             # u_envmap: images/relief-shading-environment-map.jpg
-    #             u_envmap: draw-test8.jpg
+    #             u_envmap: images/draw-test8.jpg
     #             u_scale: 4.5 # higher values are more exaggerated
     #             # z0 = 0.0001
     #             # z1 = 0.0001
@@ -665,7 +665,7 @@ styles:
         shaders:
             uniforms:
                 # u_envmap: images/relief-shading-environment-map.jpg
-                u_envmap: images/draw-test9.jpg
+                u_envmap: draw-test9.jpg
                 u_contrast: 1.
                 u_brightness: 1.
             blocks:
