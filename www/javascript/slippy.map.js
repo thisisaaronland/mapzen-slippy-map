@@ -376,7 +376,9 @@ slippy.map = (function(){
 			}
 
 			_proxy_enabled = true;
-			slippy.map.configure_proxy();
+			
+			// what if the scene isn't loaded yet, right?
+			// slippy.map.configure_proxy();
 		},
 
 		'disable_proxy': function(){
