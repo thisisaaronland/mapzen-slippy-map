@@ -27,6 +27,4 @@ fmt:
 	go fmt cmd/*.go
 
 server: self
-	@GOPATH=$(GOPATH)@GOOS=darwin@GOARCH=386 go build -o ../utils/darwin/www-server cmd/www-server.go
-	@GOPATH=$(GOPATH)@GOOS=windows@GOARCH=386 go build -o ../utils/windows/www-server cmd/www-server.go
-	@GOPATH=$(GOPATH)@GOOS=linux@GOARCH=386 go build -o ../utils/linux/www-server cmd/www-server.go	
+	./build.sh
