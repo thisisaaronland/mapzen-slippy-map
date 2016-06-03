@@ -48,6 +48,8 @@ window.onload = function(e){
 	}
 	
 	// go!
+
+	slippy.map.config.init();
 	
 	slippy.map.init(style);
 	window.onkeydown = slippy.map.onkeyboard;
