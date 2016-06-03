@@ -1,0 +1,15 @@
+var slippy = slippy || {};
+slippy.map = slippy.map || {};
+
+slippy.map.config = (function(){
+
+	var self = {
+
+		'init': function(){
+			// slippy.map.enable_proxy(true);
+		}
+	};
+
+	return self
+
+})();

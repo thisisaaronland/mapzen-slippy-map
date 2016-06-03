@@ -101,8 +101,8 @@ slippy.map = (function(){
 				
 				load: function(scene){
 
-					if (slippy.map.proxy_enabled()){
-						slippy.map.enable_proxy(scene);
+					if (slippy.map.is_proxy_enabled()){
+						slippy.map.configure_proxy(scene);
 					}
 				},
 
@@ -114,7 +114,7 @@ slippy.map = (function(){
 			return tangram;
 		},
 
-		'enable_proxy': function(scene){
+		'configure_proxy': function(scene){
 
 			if (! scene){
 				scene = slippy.map.scene();
@@ -369,20 +369,27 @@ slippy.map = (function(){
 			}
 		},
 
-		'proxy_enabled': function(bool){
+		'enable_proxy': function(){
 
-			if (typeof(bool) != 'undefined'){
-
-				bool = (bool) ? true : false
-
-				if (bool != _proxy_enabled){
-					_proxy_enabled = bool;
-
-					if (bool){
-						self.enable_proxy();
-					}
-				}
+			if (slippy.map.is_proxy_enabled()){
+				return;
 			}
+
+			_proxy_enabled = true;
+			slippy.map.configure_proxy();
+		},
+
+		'disable_proxy': function(){
+
+			if (! slippy.map.is_proxy_enabled()){
+				return;
+			}
+
+			_proxy_enabled = false;
+			// slippy.map.un_configure_proxy();
+		},
+		
+		'is_proxy_enabled': function(bool){
 
 			return _proxy_enabled;
 		},

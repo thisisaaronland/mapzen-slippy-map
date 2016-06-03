@@ -65,5 +65,6 @@ server:
 	$(MAKE) -C www-server server
 
 slippy:
+	if test ! -e www/javascript/slippy.map.config.js; then cp www/javascript/slippy.map.config.js.example www/javascript/slippy.map.config.js; fi
 	if test ! -e utils/$(UNAME)/www-server; then echo "missing build for $(UNAME)"; exit 1; fi
 	./utils/$(UNAME)/www-server -path ./www
