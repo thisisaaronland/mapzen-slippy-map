@@ -1,0 +1,6 @@
+{
+	"cache": { "name": "Disk", "path": "../proxy/cache" },
+	"layers": {
+		"osm/all": { "url": "https://vector.mapzen.com/osm/all/{z}/{x}/{y}.{fmt}", "formats": ["mvt", "topojson"] }
+	}
+}

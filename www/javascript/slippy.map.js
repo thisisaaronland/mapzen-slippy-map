@@ -17,7 +17,7 @@ slippy.map = (function(){
 		'zinc': 'tangram/zinc/zinc.yaml',
 	};
 
-	var _proxy_enabled = true;
+	var _proxy_enabled = false;
 	var _proxy_endpoint = location.protocol + "//" + location.host;
 	
 	var self = {

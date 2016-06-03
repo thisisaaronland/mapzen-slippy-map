@@ -67,4 +67,7 @@ server:
 slippy:
 	if test ! -e www/javascript/slippy.map.config.js; then cp www/javascript/slippy.map.config.js.example www/javascript/slippy.map.config.js; fi
 	if test ! -e utils/$(UNAME)/www-server; then echo "missing build for $(UNAME)"; exit 1; fi
-	./utils/$(UNAME)/www-server -path ./www
+	if test -z "$$PROXY"; then utils/$(UNAME)/www-server -path www -tls; exit 0; fi
+	if test ! -d proxy/cache; then mkdir -p proxy/cache; fi
+	if test ! -e proxy/config.json; then cp proxy/config.json.example proxy/config.json; fi
+	utils/$(UNAME)/www-server -path www -tls -proxy -proxy-config proxy/config.json
