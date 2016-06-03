@@ -64,10 +64,14 @@ screenfull:
 server:
 	$(MAKE) -C www-server server
 
+proxy:
+	$(MAKE) slippy PROXY=1
+
 slippy:
 	if test ! -e www/javascript/slippy.map.config.js; then cp www/javascript/slippy.map.config.js.example www/javascript/slippy.map.config.js; fi
 	if test ! -e utils/$(UNAME)/www-server; then echo "missing build for $(UNAME)"; exit 1; fi
 	if test -z "$$PROXY"; then utils/$(UNAME)/www-server -path www -tls; exit 0; fi
-	if test ! -d proxy/cache; then mkdir -p proxy/cache; fi
-	if test ! -e proxy/config.json; then cp proxy/config.json.example proxy/config.json; fi
-	utils/$(UNAME)/www-server -path www -tls -proxy -proxy-config proxy/config.json
+	if test ! -d tiles/cache; then mkdir -p tiles/cache; fi
+	if test ! -e tiles/config.json; then cp tiles/config.json.example tiles/config.json; fi
+	@echo "SOMETHING SOMETHING SOMETHING UPDATE slippy.map.config.js HERE"
+	utils/$(UNAME)/www-server -path www -tls -proxy -proxy-config tiles/config.json
