@@ -820,6 +820,7 @@ layers:
             filter:
                 all:
                     - kind: [ocean, lake, water, riverbank, reservoir, swimming_pool]
+                # WARNING: any area filters here must match the area filters in the water_boundaries-not-ocean layer
                 any:
                     # limit show smaller landuse areas to higher zooms
                     - { $zoom: { min: 1 },  area: { min: 40000000000 } }
@@ -885,6 +886,7 @@ layers:
                     - boundary: yes
                     - not: { kind: [ocean,playa] }
                     - $zoom: { min: 8}
+                # WARNING: any area filters here must match the area filters in the lakes layer
                 any:
                     # limit show smaller landuse areas to higher zooms
                     - { $zoom: { min: 1 },  area: { min: 40000000000 } }
@@ -2270,7 +2272,7 @@ layers:
                     cap: round
                     join: round
                     color: '#909090'
-                    width: [[13,0px],[14,1.5px],[15, 1.75px], [16, 2px], [18, 3m]]
+                    width: [[13,0px],[14,1px],[15, 1.25px], [16, 2px], [18, 3m]]
                 text-blend-order:
                     priority: 18
                     visible: *text_visible_piste
@@ -4646,7 +4648,7 @@ layers:
                     filter: { kind: [water_tower], $zoom: { min: 15 } }
                     draw:   { icons: { sprite: water-tower, visible: *icon_visible_poi_landuse_e } }
             battlefield:
-                    filter: { kind: [battlefield], $zoom: { min: 15 } }
+                    filter: { kind: [battlefield] }
                     draw:   { icons: { sprite: battlefield, visible: *icon_visible_poi_landuse_e } }
             walking-or-bicycle_junction:
                 filter: { kind: [bicycle_junction, walking_junction] }
@@ -4772,13 +4774,12 @@ layers:
                     poi_labels-z20-up:
                         filter: { $zoom: { min: 20 } }
                         draw: { text-blend-order: { font: { size: 11px } } }
-
             landuse-labels-green-areas-not-national-park:
                 filter:
                     all:
                         - area: true
                         - $geometry: point
-                        - kind: [park, national_park, "park or protected land",conservation, protected_area, nature_reserve, forest, grass, battlefield]
+                        - kind: [park, national_park, "park or protected land",conservation, protected_area, nature_reserve, forest, grass]
                     any:
                         # show labels for smaller landuse areas at higher zooms
                         - { $zoom: [5],    area: { min: 10000000000 } }
@@ -4834,7 +4835,7 @@ layers:
                            text-blend-order: { visible: false }
                            icons: { visible: false }
                     early-not-national-park:
-                        filter: { not: { kind: [national_park, battlefield] }, $zoom: { max: 6 } }
+                        filter: { not: { kind: [national_park] }, $zoom: { max: 6 } }
                         draw:
                             text-blend-order: { visible: false }
                             icons: { visible: false }
@@ -4863,6 +4864,37 @@ layers:
                         draw:
                             text-blend-order: { font: { style: italic } }
                             icons: { visible: false }
+            battlefield:
+                filter:
+                    all:
+                        - area: true
+                        - $geometry: point
+                        - kind: [battlefield]
+                    any:
+                        # show labels for smaller landuse areas at higher zooms
+                        - { $zoom: [4],  area: { min: 3000000000 } }
+                        - { $zoom: [5],  area: { min: 3000000000 } }
+                        - { $zoom: [6],  area: { min: 500000000 } }
+                        - { $zoom: [7,8,9],  area: { min: 10000000 } }
+                        - { $zoom: [10], area: { min: 5000000 } }
+                        - { $zoom: [11], area: { min: 5000000 } }
+                        - { $zoom: [12], area: { min: 5000000 } }
+                        - { $zoom: [13], area: { min: 200000 } }
+                        - { $zoom: [14], area: { min: 50000 } }
+                        - { $zoom: { min: 15 } }
+                draw:
+                    icons:
+                        visible: *icon_visible_landuse_green
+                        sprite: battlefield
+                        priority: 41
+                    text-blend-order:
+                        visible: *text_visible_landuse_green
+                        priority: 42
+                        font:
+                            fill: [0.058,0.605,0.615]
+                            # fill: [0.093,0.473,0.408]
+                            style: italic
+                            stroke: { color: *text_stroke_park, width: 4 }
             beach:
                 filter:
                     all:
@@ -6660,16 +6692,16 @@ layers:
                     join: round
                     cap: round
                     color: [[13, [0.298,0.686,0.627]], [14,[0.298,0.686,0.627]], [15, [0.298,0.686,0.627]], [16, [0.860,1.000,0.977]], [17, [0.860,1.000,0.977]]]
-                    width: [[13, 1px], [14, 1.1px], [15, 1.25px], [16, 0px], [17, 1px], [18, 1.75px], [19, 2.25px]]
+                    width: [[13, 1px], [14, 1.1px], [15, 1.5px], [16, 0px], [17, 1px], [18, 1.75px], [19, 2.25px]]
                     order: 1003
                     outline:
                         color: [0.120,0.600,0.520]
-                        width: [[15, 0px], [16, 0.6px], [17, 1.25px], [18, 2.5px]]
+                        width: [[15, 0px], [16, 0.5px], [17, 1.25px], [18, 2.5px]]
             networked:
                 filter: { walking_network: true }
                 draw:
                     lines:
-                        width: [[12, 1px], [13, 1px], [14, 1.45px], [15, 1.75px], [16, 0px], [17, 1.5px], [18, 1.75px], [19, 2.25px]]
+                        width: [[12, 1px], [13, 1px], [14, 1.1px], [15, 1.5px], [16, 0px], [17, 1.5px], [18, 1.75px], [19, 2.25px]]
                     highlight:
                         order: 980
                         color: [[12,[1.000,1.000,0.870]],[15,[1.000,1.000,0.870]]]
@@ -6684,7 +6716,7 @@ layers:
                 filter: { landuse_kind: [zoo, golf_course, garden, university, cemetery, allotments] }
                 draw:
                     lines:
-                        width: [[13, 1px], [14, 1.1px], [15, 1.25px], [16, 0px], [17, 1.5px], [18, 1.75px], [19, 2.25px]]
+                        width: [[13, 0.5px], [15, 0.65px], [16, 0px], [17, 1.5px], [18, 1.75px], [19, 2.25px]]
                 early:
                     filter: { $zoom: { max: 15 } }
                     draw:
@@ -6715,7 +6747,7 @@ layers:
                 dots-lines:
                     order: 1002
                     interactive: true
-                    width: [[13, 0.75px], [14, 0.85px], [15, 1.1px], [16, 5px], [17, 6px], [18, 7px], [19, 10px]]
+                    width: [[13, 0.75px], [14, 0.85px], [15, 1.1px], [16, 3px], [17, 6px], [18, 7px], [19, 10px]]
                     visible: true
                     #color: purple
                 lines:
@@ -6736,11 +6768,11 @@ layers:
                 filter: { walking_network: true }
                 draw:
                     lines:
-                        width: [[12, 1px], [13, 1px], [14, 1.45px], [15, 1.75px], [16, 0px], [17, 1.5px], [18, 1.75px], [19, 2.25px]]
+                        width: [[12, 0.75px], [13, 1px], [14, 1px], [15, 1.25px], [16, 0px], [17, 1.5px], [18, 1.75px], [19, 2.25px]]
                     highlight:
                         order: 980
                         color: [[12,[0.900,1.000,0.850]],[14,[0.930,1.000,0.850]],[15,[1.000,1.000,0.870]]]
-                        width: [[12, 2px], [13, 5px], [14, 6px], [15, 7px], [16, 8px], [17, 10px], [18, 14px], [19, 16px]]
+                        width: [[12, 3px], [13, 4px], [14, 5px], [15, 6px], [16, 8px], [17, 10px], [18, 14px], [19, 16px]]
                         join: round
             steps_early:
                 filter: { highway: steps, $zoom: { max: 16 } }
@@ -6772,15 +6804,15 @@ layers:
                     draw:
                         lines:
                             color: [[15,[0.120,0.600,0.520]],[16,[0.623,0.820,0.797]]]
-                            width: [[15, 1.75px],[16, 2.75px], [17, 4px], [18, 5px], [19, 8px]]
+                            width: [[15, 1.75px],[16, 2px], [17, 4px], [18, 5px], [19, 8px]]
                 no_name-late:
                     filter: { name: false }
                     draw:
                         dots-lines:
                             color: [0.120,0.600,0.520]
-                            width: [[16, 4px], [17, 4px], [18, 5px], [19, 8px]]
+                            width: [[16, 3px], [17, 4px], [18, 5px], [19, 8px]]
                         lines:
-                            color: [0.672,0.840,0.820]
+                            color: [0.671,0.839,0.820]
                             width: [[16, 2px], [17, 3px], [18, 4px], [19, 7px]]
             no_name:
                 filter: { name: false, not: { highway: steps } }
@@ -6882,7 +6914,7 @@ layers:
 
                     color: [[11,[0.120,0.600,0.520]],[14,[0.120,0.600,0.520]],[15,[1.00,1.00,1.00]]]
                     #width: [[11, 0.25px], [12, 0.35px], [13, 0.55px],[14,1px],[15,0px]]
-                    width: [[13, 1px], [14, 1.45px], [15, 1.1px], [16, 1.5px], [17, 2.2px], [18, 5px], [19, 6px]]
+                    width: [[13, 0.75px], [14, 1.1px], [15, 1.1px], [16, 1.5px], [17, 2.2px], [18, 5px], [19, 6px]]
                     # let roads sort themselves past zoom 14
                     order: 1004
                     outline:
@@ -6893,7 +6925,7 @@ layers:
                 draw:
                     lines:
                         color: [[11,[0.120,0.600,0.520]],[14,[0.120,0.600,0.520]],[15,[1.00,1.00,1.00]]]
-                        width: [[13, 1px], [14, 1.45px], [15, 1.1px], [16, 1.5px], [17, 2.2px], [18, 5px], [19, 6px]]
+                        width: [[13, 0.75px], [14, 1.1px], [15, 1.1px], [16, 1.5px], [17, 2.2px], [18, 5px], [19, 6px]]
                     highlight:
                         order: 980
                         color: [[12,[0.900,1.000,0.850]],[14,[0.930,1.000,0.850]],[15,[1.000,1.000,0.880]]]
@@ -6932,7 +6964,7 @@ layers:
                 - motor_vehicle: false
         draw:
             lines:
-                color: [0.630,0.519,0.418]
+                color: [[14,[0.773,0.705,0.605]],[15,[0.630,0.519,0.418]]]
                 # color: [0.756,0.563,0.499]
                 width: [[13, 0.6px], [14, 1px], [15, 1.1px], [16, 1.25px], [17, 1.5px], [18, 5px], [19, 6px]]
                 order: 990
@@ -6941,7 +6973,7 @@ layers:
             filter: { walking_network: true }
             draw:
                 lines:
-                    width: [[13, 1px], [14, 1px], [15, 1.5px], [16, 1.25px], [17, 1.5px], [18, 3px], [19, 4px]]
+                    width: [[13, 0.75px], [14, 1px], [15, 1.5px], [16, 1.25px], [17, 1.5px], [18, 3px], [19, 4px]]
                 highlight:
                     order: 980
                     color: [[12,[1.000,1.000,0.870]],[15,[1.000,1.000,0.870]]]

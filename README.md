@@ -79,6 +79,8 @@ start and listen for requests at https://localhost:8080
 
 _Note the self-signed TLS stuff discussed above._
 
+As of this writing there are no controls for refreshing tile or invoking any kind of cache invalidation outside of deleting the local `tiles/cache` directory.
+
 ## Keyboard controls
 
 ## WASD
