@@ -41,6 +41,8 @@ func main() {
 
 	handler := cors.EnsureCORSHandler(fs, *cors_enable, *cors_allow)
 
+	// https://mapzen.com/documentation/vector-tiles/api-keys-and-rate-limits/
+	
 	if *proxy_tiles {
 
 	   	config, err := slippytiles.NewConfigFromFile(*proxy_config)

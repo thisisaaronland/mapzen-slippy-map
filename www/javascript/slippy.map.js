@@ -19,7 +19,7 @@ slippy.map = (function(){
 
 	var _proxy_enabled = false;
 	var _proxy_endpoint = location.protocol + "//" + location.host;
-	
+
 	var self = {
 
 		'init': function(style){
@@ -106,6 +106,11 @@ slippy.map = (function(){
 					}
 				},
 
+				// this is here as a placeholder for when there is a
+				// complimentary view_not_complete (or "in progress")
+				// even that we can use to toggle the state of the
+				// screenshot controls (20160606/thisisaaronland)
+				
 				view_complete: function(){
 					// console.log('scene view complete');
 				}
@@ -116,16 +121,37 @@ slippy.map = (function(){
 
 		'configure_proxy': function(scene){
 
+			var before = 'https://vector.mapzen.com';			
+			var after = slippy.map.proxy_endpoint();
+			
 			if (! scene){
 				scene = slippy.map.scene();
 			}
-			
-			for (var src in scene.config.sources){
-				var cfg = scene.config.sources[src]
-				var url = cfg.url.replace('https://vector.mapzen.com', slippy.map.proxy_endpoint())
 
-				cfg['url'] = url				
-				scene.config.sources[src] = cfg
+			slippy.map.toggle_proxy(scene, before, after);
+		},
+
+		'unconfigure_proxy': function(scene){
+
+			var before = slippy.map.proxy_endpoint();
+			var after = 'https://vector.mapzen.com';
+			
+			if (! scene){
+				scene = slippy.map.scene();
+			}
+
+			slippy.map.toggle_proxy(scene, before, after);
+		},
+
+		'toggle_proxy': function(scene, before, after){
+
+			for (var src in scene.config.sources){
+				
+				var cfg = scene.config.sources[src];
+				var url = cfg.url.replace(before, after);
+
+				cfg['url'] = url;		
+				scene.config.sources[src] = cfg;
 			}
 			
 		},

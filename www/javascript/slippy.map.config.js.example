@@ -3,10 +3,24 @@ slippy.map = slippy.map || {};
 
 slippy.map.config = (function(){
 
+	// See this? It may seem redundant and pointless since
+	// it does is trigger the 'slippy.map.enable_proxy' function
+	// below. It (the '_proxy' variable is actually present as a
+	// hook for the 'proxy' Makefile target to use to ensure that
+	// all the various pieces (specifically the www-server and the
+	// JS which don't interact with one another beyond basic file
+	// serving) are set up correctly. It's not necessarily pretty
+	// but it works, so there you go... (20160606/thisisaaronland)
+	
+	var _proxy = false;
+	
 	var self = {
 
 		'init': function(){
-			// slippy.map.enable_proxy(true);
+
+			if (_proxy){
+				slippy.map.enable_proxy();
+			}
 		}
 	};
 

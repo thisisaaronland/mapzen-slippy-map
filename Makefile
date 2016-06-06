@@ -73,5 +73,5 @@ slippy:
 	if test -z "$$PROXY"; then utils/$(UNAME)/www-server -path www -tls; exit 0; fi
 	if test ! -d tiles/cache; then mkdir -p tiles/cache; fi
 	if test ! -e tiles/config.json; then cp tiles/config.json.example tiles/config.json; fi
-	@echo "SOMETHING SOMETHING SOMETHING UPDATE slippy.map.config.js HERE"
+	perl -p -i -e "s/var\s+_proxy\s+=\s+false;/var _proxy = true;/" www/javascript/slippy.map.config.js
 	utils/$(UNAME)/www-server -path www -tls -proxy -proxy-config tiles/config.json
