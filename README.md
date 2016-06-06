@@ -44,7 +44,9 @@ It is also possible to proxy (and cache) tiles from Mapzen, assuming you are usi
 make proxy
 ```
 
-Like the `slippy` Makefile target this is just a convenience for a bunch of typing you can and may want to do by hand. There's actually a bunch of things going on so it's worth describing them. The first thing the `proxy` target does is invoke the `slippy` target passing along a `PROXY=1` argument: 
+Like the `slippy` Makefile target this is just a convenience for a bunch of typing you can and may want to do by hand.
+
+There's actually a bunch of things going on so it's worth describing them. The first thing the `proxy` target does is invoke the `slippy` target passing along a `PROXY=1` argument: 
 
 ```
 /usr/bin/make slippy PROXY=1
@@ -66,6 +68,7 @@ Next we make sure that the Javascript configuration files enable tile proxying. 
 
 ```
 perl -p -i -e "s/var\s+_proxy\s+=\s+false;/var _proxy = true;/" www/javascript/slippy.map.config.js
+```
 
 Finally we start the web server with flags to enable tile proxing that you can visit in your web browser by going to `https://localhost:8080`.
 
