@@ -20,12 +20,12 @@ Like this:
 make slippy
 ```
 
-This will start a small [local web server](www-server) that you can visit in your web browser by going to `https://localhost:8080`
+This will start a small [local web server](www-server) that you can visit in your web browser by going to `http://localhost:8080`
 
 If you don't know what a "Makefile" is or don't make the `make` program installed on your computer you can start `mapzen-slippy-map` by hand, from the command-line, like this:
 
 ```
-./utils/PLATFORM/www-server -path ./www -tls
+./utils/PLATFORM/www-server -path ./www
 ```
 
 Where `PLATFORM` should be one of the following:
@@ -34,9 +34,9 @@ Where `PLATFORM` should be one of the following:
 * linux
 * windows
 
-_By default the local web server will create a self-signed TLS certificate and key pair. Because they are self-signed this will cause your web browser to complain about not knowing who actually signed the TLS certificate. This is the correct behaviour (for a web browser). If you don't want or need this functionality then you should remove the `-tls` flag when invoking the web server. It is not at all clear that enabling TLS by default is the correct approach and this may change in the future._
-
 ### Advanced
+
+#### Proxying (and caching tiles)
 
 It is also possible to proxy (and cache) tiles from Mapzen, assuming you are using the [local web server](www-server). Like this:
 
@@ -52,7 +52,7 @@ There's actually a bunch of things going on so it's worth describing them. The f
 /usr/bin/make slippy PROXY=1
 if test ! -e www/javascript/slippy.map.config.js; then cp www/javascript/slippy.map.config.js.example www/javascript/slippy.map.config.js; fi
 if test ! -e utils/darwin/www-server; then echo "missing build for darwin"; exit 1; fi
-if test -z "$PROXY"; then utils/darwin/www-server -path www -tls; exit 0; fi
+if test -z "$$PROXY"; then if test -z "$$TLS"; then utils/$(UNAME)/www-server -path www; else utils/$(UNAME)/www-server -path www -tls; fi; exit 0; fi
 ```
 
 Since the `PROXY` argument the Make program continues along ensuring that there are both a folder to cache proxied tiles in and a config file for how to manage tile proxying:
@@ -70,16 +70,31 @@ Next we make sure that the Javascript configuration files enable tile proxying. 
 perl -p -i -e "s/var\s+_proxy\s+=\s+false;/var _proxy = true;/" www/javascript/slippy.map.config.js
 ```
 
-Finally we start the web server with flags to enable tile proxing that you can visit in your web browser by going to `https://localhost:8080`.
+Finally we start the web server with flags to enable tile proxing that you can visit in your web browser by going to `http://localhost:8080`.
 
 ```
-utils/darwin/www-server -path www -tls -proxy -proxy-config tiles/config.json
+if test -z "$$TLS"; then utils/$(UNAME)/www-server -path www -proxy -proxy-config tiles/config.json; else utils/$(UNAME)/www-server -path www -tls -proxy -proxy-config tiles/config.json; fi
+start and listen for requests at http://localhost:8080
+```
+
+As of this writing there are no controls for refreshing tile or invoking any kind of cache invalidation outside of deleting the local `tiles/cache` directory.
+
+#### TLS
+
+By default the [local web server](www-server) listens for requests on port `80` which is unencrypted. If you want to use an encrypted connection you can pass a `TLS=1` to any of the relevant Makefile targets. This will prompt the server to pre-generate a self-signed TLS key and certificate pair, like this:
+
+```
+make proxy TLS=1
 start and listen for requests at https://localhost:8080
 ```
 
-_Note the self-signed TLS stuff discussed above._
+If you are starting the server manually simply include a `-tls` argument, like this:
 
-As of this writing there are no controls for refreshing tile or invoking any kind of cache invalidation outside of deleting the local `tiles/cache` directory.
+```
+utils/darwin/www-server -path www -tls -proxy -proxy-config tiles/config.json
+```
+
+Please remember that these are _self-signed_ credentials which means your web browser won't know _who_ signed them and complain accordingly. This is the correct behaviour so remember to approach things with patience and diligence.
 
 ## Keyboard controls
 

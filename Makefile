@@ -71,8 +71,8 @@ slippy:
 	if test ! -e www/javascript/slippy.map.config.js; then cp www/javascript/slippy.map.config.js.example www/javascript/slippy.map.config.js; fi
 	perl -p -i -e "s/var\s+_proxy\s+=\s+true;/var _proxy = false;/" www/javascript/slippy.map.config.js
 	if test ! -e utils/$(UNAME)/www-server; then echo "missing build for $(UNAME)"; exit 1; fi
-	if test -z "$$PROXY"; then utils/$(UNAME)/www-server -path www -tls; exit 0; fi
+	if test -z "$$PROXY"; then if test -z "$$TLS"; then utils/$(UNAME)/www-server -path www; else utils/$(UNAME)/www-server -path www -tls; fi; exit 0; fi
 	if test ! -d tiles/cache; then mkdir -p tiles/cache; fi
 	if test ! -e tiles/config.json; then cp tiles/config.json.example tiles/config.json; fi
 	perl -p -i -e "s/var\s+_proxy\s+=\s+false;/var _proxy = true;/" www/javascript/slippy.map.config.js
-	utils/$(UNAME)/www-server -path www -tls -proxy -proxy-config tiles/config.json
+	if test -z "$$TLS"; then utils/$(UNAME)/www-server -path www -proxy -proxy-config tiles/config.json; else utils/$(UNAME)/www-server -path www -tls -proxy -proxy-config tiles/config.json; fi
