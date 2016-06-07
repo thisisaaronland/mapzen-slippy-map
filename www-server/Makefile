@@ -27,4 +27,4 @@ fmt:
 	go fmt cmd/*.go
 
 server: self
-	./build.sh
+	./build-precompiled.sh
