@@ -20,6 +20,9 @@ slippy.map = (function(){
 	var _proxy_enabled = false;
 	var _proxy_endpoint = location.protocol + "//" + location.host;
 
+	// maybe make this an array? maybe but not today...
+	// (20160609/thisisaaronland)
+	
     	var _custom_keyboard_events = null;
 
 	var self = {
@@ -280,14 +283,14 @@ slippy.map = (function(){
 			return false;
 		},
 
-	    'register_keyboard_events': function(cb){
-		
-		if (typeof(cb) != "function"){
-		    return false;
-		}
+		'register_keyboard_events': function(cb){
 
-		_custom_keyboard_events = cb;
-	    },
+			if (typeof(cb) != "function"){
+				return false;
+			}
+
+			_custom_keyboard_events = cb;
+		},
 
 		'onkeyboard': function(event){
 			var key = event.keyCode || event.which;
@@ -405,9 +408,9 @@ slippy.map = (function(){
 				slippy.map.load_style('zinc');
 			}
 
-		    if (typeof(_custom_keyboard_events) == "function"){
-			_custom_keyboard_events(event);
-		    }
+			if (typeof(_custom_keyboard_events) == "function"){
+				_custom_keyboard_events(event);
+			}
 
 		},
 
