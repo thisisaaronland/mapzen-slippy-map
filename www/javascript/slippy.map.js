@@ -20,6 +20,8 @@ slippy.map = (function(){
 	var _proxy_enabled = false;
 	var _proxy_endpoint = location.protocol + "//" + location.host;
 
+    	var _custom_keyboard_events = null;
+
 	var self = {
 
 		'init': function(style){
@@ -278,15 +280,24 @@ slippy.map = (function(){
 			return false;
 		},
 
+	    'register_keyboard_events': function(cb){
+		
+		if (typeof(cb) != "function"){
+		    return false;
+		}
+
+		_custom_keyboard_events = cb;
+	    },
+
 		'onkeyboard': function(event){
 			var key = event.keyCode || event.which;
 			var keychar = String.fromCharCode(key);
-
-			// console.log(event);
+		    
+		    	// console.log(event);
 
 			// https://en.wikipedia.org/wiki/Arrow_keys
 			
-			if (! event.shiftKey){			
+			if (! event.shiftKey){
 
 				var map = self.map();
 				var pixels = 75;
@@ -393,6 +404,11 @@ slippy.map = (function(){
 			if (key == 90){
 				slippy.map.load_style('zinc');
 			}
+
+		    if (typeof(_custom_keyboard_events) == "function"){
+			_custom_keyboard_events(event);
+		    }
+
 		},
 
 		'enable_proxy': function(){
