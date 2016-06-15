@@ -89,8 +89,9 @@ slippy.map = (function(){
 		// https://mapzen.com/documentation/tangram/
 		
 		'tangram': function(scene){
-			
-			var scene = self.scenefile(_current_style);
+
+			var style = self.style();
+			var scene = self.scenefile(style);
 			
 			var tangram = Tangram.leafletLayer({
 				scene: scene,
@@ -219,6 +220,10 @@ slippy.map = (function(){
 			
 			return s;
 		},
+
+		'style': function(){
+			return _current_style;
+		},
 		
 		// requires https://github.com/eligrey/FileSaver.js
 		
@@ -249,7 +254,7 @@ slippy.map = (function(){
 			var ymd = iso[0];
 			ymd = ymd.replace("-", "", "g")
 			
-			var style = _current_style;
+			var style = self.style();
 			
 			var fname = ['slippy-map', ymd, style, geohash];
 			fname = fname.join('-');
@@ -368,7 +373,9 @@ slippy.map = (function(){
 
 			if (key == 76){
 				_labels = (_labels) ? false : true;
-				slippy.map.load_style(_current_style);
+
+				var style = self.style();
+				slippy.map.load_style(style);
 			}
 
 			// O is for outdoor
