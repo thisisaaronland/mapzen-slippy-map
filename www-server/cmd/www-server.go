@@ -4,14 +4,100 @@ import (
 	"flag"
 	"fmt"
 	"github.com/thisisaaronland/go-slippy-tiles"
-	"github.com/thisisaaronland/go-slippy-tiles/provider"
+	slippy "github.com/thisisaaronland/go-slippy-tiles/provider"
 	"github.com/whosonfirst/go-httpony/cors"
 	"github.com/whosonfirst/go-httpony/tls"
+	// "github.com/whosonfirst/go-httpony/tls/rewrite"	
+	"golang.org/x/net/html"
+	"io"
 	"net/http"
+	"net/http/cookiejar"
 	"os"
 	"path/filepath"
 	"regexp"
 )
+
+type HTMLRewriter interface {
+	Rewrite(node *html.Node, writer io.Writer) error
+	SetKey(key string, value interface{}) error
+}
+
+type TestRewriter struct {
+	HTMLRewriter
+	request *http.Request
+}
+
+func (t TestRewriter) SetKey(key string, value interface{}) error {
+
+	if key == "request" {
+		t.request = value.(*http.Request)
+	}
+	
+	return nil
+}
+
+func (t TestRewriter) Rewrite(node *html.Node, writer io.Writer) error {
+
+	jar, err := cookiejar.New(nil)
+
+	if err != nil {
+		return err
+	}
+
+	url := t.request.URL
+	cookies := jar.Cookies(url)
+	fmt.Println(cookies)
+	
+	var f func(node *html.Node, writer io.Writer)
+
+	f = func(n *html.Node, w io.Writer) {
+
+		if n.Type == html.ElementNode && n.Data == "body" {
+
+			ns := ""
+			key := "data-x-foo"
+			value := "bar"
+			
+			a := html.Attribute{ns, key, value}			
+			n.Attr = append(n.Attr, a)
+		}
+
+		html.Render(w, n)
+
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			f(c, w)
+		}
+	}
+
+	f(node, writer)
+
+	return nil
+}
+
+type HTMLRewriteHandler struct {
+	writer HTMLRewriter
+}
+
+func (h HTMLRewriteHandler) Handler(reader io.Reader) http.Handler {
+
+	fn := func(rsp http.ResponseWriter, req *http.Request) {
+
+		doc, err := html.Parse(reader)
+
+		if err != nil {
+			http.Error(rsp, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		fmt.Println(h.writer)
+		
+		h.writer.SetKey("request", req)
+		h.writer.Rewrite(doc, rsp)
+		return
+	}
+
+	return http.HandlerFunc(fn)
+}
 
 func main() {
 
@@ -25,6 +111,7 @@ func main() {
 	var tls_key = flag.String("tls-key", "", "Path to an existing TLS key. If absent a self-signed key will be generated.")
 	var proxy_tiles = flag.Bool("proxy", false, "Proxy and cache tiles locally.")
 	var proxy_config = flag.String("proxy-config", "", "Path to a valid config file for slippy tiles.")
+	var rewrite_html = flag.Bool("rewrite-html", false, "...")
 
 	flag.Parse()
 
@@ -41,42 +128,71 @@ func main() {
 
 	handler := cors.EnsureCORSHandler(fs, *cors_enable, *cors_allow)
 
-	// https://mapzen.com/documentation/vector-tiles/api-keys-and-rate-limits/
-	
+	var re_tile *regexp.Regexp
+	var re_html *regexp.Regexp
+
+	var provider slippytiles.Provider
+	var rewriter HTMLRewriteHandler
+
 	if *proxy_tiles {
 
-	   	config, err := slippytiles.NewConfigFromFile(*proxy_config)
+		config, err := slippytiles.NewConfigFromFile(*proxy_config)
 
 		if err != nil {
 			panic(err)
 		}
 
-		provider, err := provider.NewProviderFromConfig(config)
+		provider, err = slippy.NewProviderFromConfig(config)
 
 		if err != nil {
 			panic(err)
 		}
 
-		re, _ := regexp.Compile(`/(.*)/(\d+)/(\d+)/(\d+).(\w+)$`)
+		re_tile, _ = regexp.Compile(`/(.*)/(\d+)/(\d+)/(\d+).(\w+)$`)
+	}
 
-		juggler := func(rsp http.ResponseWriter, req *http.Request) {
+	if *rewrite_html {
 
-			url := req.URL
-			path := url.Path
+		writer := new(TestRewriter)
+		rewriter = HTMLRewriteHandler{writer}
 
-			if re.MatchString(path) {
-				handler := provider.Handler()
-				handler.ServeHTTP(rsp, req)
+		// rewriter := rewrite.HTMLRewriteHandler{writer}
+		
+		re_html, _ = regexp.Compile(`/(?:.*).html$`)
+	}
+
+	juggler := func(rsp http.ResponseWriter, req *http.Request) {
+
+		url := req.URL
+		path := url.Path
+
+		if *proxy_tiles && re_tile.MatchString(path) {
+			handler := provider.Handler()
+			handler.ServeHTTP(rsp, req)
+			return
+		}
+
+		if *rewrite_html && re_html.MatchString(path) {
+
+			abs_path := filepath.Join(docroot, path)
+			reader, err := os.Open(abs_path)
+
+			if err != nil {
+				http.Error(rsp, err.Error(), http.StatusInternalServerError)
 				return
 			}
 
-			fs.ServeHTTP(rsp, req)
+			handler := rewriter.Handler(reader)
+			handler.ServeHTTP(rsp, req)
+			return
 		}
 
-		proxy := http.HandlerFunc(juggler)
-
-		handler = cors.EnsureCORSHandler(proxy, *cors_enable, *cors_allow)
+		fs.ServeHTTP(rsp, req)
 	}
+
+	proxy := http.HandlerFunc(juggler)
+
+	handler = cors.EnsureCORSHandler(proxy, *cors_enable, *cors_allow)
 
 	if *tls_enable {
 

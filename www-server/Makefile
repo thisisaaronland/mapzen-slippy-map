@@ -14,14 +14,9 @@ build:	rmdeps bin
 deps:
 	@GOPATH=$(shell pwd) go get -u "github.com/whosonfirst/go-httpony"
 	@GOPATH=$(shell pwd) go get -u "github.com/thisisaaronland/go-slippy-tiles"
-
+	@GOPATH=$(shell pwd) go get -u "golang.org/x/net/html"
 bin:	self
 	@GOPATH=$(GOPATH) go build -o bin/www-server cmd/www-server.go
-
-vendor: rmdeps deps
-	if test -d vendor/src; then rm -rf vendor/src; fi
-	cp -r src vendor/src
-	find vendor -name '.git' -print -type d -exec rm -rf {} +
 
 fmt:
 	go fmt cmd/*.go
