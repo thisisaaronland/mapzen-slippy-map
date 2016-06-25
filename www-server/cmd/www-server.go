@@ -7,7 +7,6 @@ import (
 	slippy "github.com/thisisaaronland/go-slippy-tiles/provider"
 	"github.com/whosonfirst/go-httpony/cors"
 	"github.com/whosonfirst/go-httpony/tls"
-	// "github.com/whosonfirst/go-httpony/tls/rewrite"	
 	"golang.org/x/net/html"
 	"io"
 	"net/http"
@@ -22,6 +21,12 @@ type HTMLRewriter interface {
 	SetKey(key string, value interface{}) error
 }
 
+func NewTestRewriter() (*TestRewriter, error) {
+
+	t := TestRewriter{}
+	return &t, nil
+}
+
 type TestRewriter struct {
 	HTMLRewriter
 	request *http.Request
@@ -32,7 +37,7 @@ func (t TestRewriter) SetKey(key string, value interface{}) error {
 	if key == "request" {
 		t.request = value.(*http.Request)
 	}
-	
+
 	return nil
 }
 
@@ -47,7 +52,7 @@ func (t TestRewriter) Rewrite(node *html.Node, writer io.Writer) error {
 	url := t.request.URL
 	cookies := jar.Cookies(url)
 	fmt.Println(cookies)
-	
+
 	var f func(node *html.Node, writer io.Writer)
 
 	f = func(n *html.Node, w io.Writer) {
@@ -57,8 +62,8 @@ func (t TestRewriter) Rewrite(node *html.Node, writer io.Writer) error {
 			ns := ""
 			key := "data-x-foo"
 			value := "bar"
-			
-			a := html.Attribute{ns, key, value}			
+
+			a := html.Attribute{ns, key, value}
 			n.Attr = append(n.Attr, a)
 		}
 
@@ -78,6 +83,15 @@ type HTMLRewriteHandler struct {
 	writer HTMLRewriter
 }
 
+func NewHTMLRewriterHandler(writer HTMLRewriter) (*HTMLRewriteHandler, error) {
+
+	h := HTMLRewriteHandler{
+		writer: writer,
+	}
+
+	return &h, nil
+}
+
 func (h HTMLRewriteHandler) Handler(reader io.Reader) http.Handler {
 
 	fn := func(rsp http.ResponseWriter, req *http.Request) {
@@ -90,7 +104,7 @@ func (h HTMLRewriteHandler) Handler(reader io.Reader) http.Handler {
 		}
 
 		fmt.Println(h.writer)
-		
+
 		h.writer.SetKey("request", req)
 		h.writer.Rewrite(doc, rsp)
 		return
@@ -132,7 +146,7 @@ func main() {
 	var re_html *regexp.Regexp
 
 	var provider slippytiles.Provider
-	var rewriter HTMLRewriteHandler
+	var rewriter *HTMLRewriteHandler
 
 	if *proxy_tiles {
 
@@ -153,11 +167,9 @@ func main() {
 
 	if *rewrite_html {
 
-		writer := new(TestRewriter)
-		rewriter = HTMLRewriteHandler{writer}
+		writer, _ := NewTestRewriter()
+		rewriter, _ = NewHTMLRewriterHandler(writer)
 
-		// rewriter := rewrite.HTMLRewriteHandler{writer}
-		
 		re_html, _ = regexp.Compile(`/(?:.*).html$`)
 	}
 
