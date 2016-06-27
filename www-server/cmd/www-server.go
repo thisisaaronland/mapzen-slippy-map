@@ -45,6 +45,11 @@ func (t TestRewriter) SetKey(key string, value interface{}) error {
 func (t TestRewriter) Rewrite(node *html.Node, writer io.Writer) error {
 
 	/*
+	   Basically trying to access any methods on t.Request results in the following error because... who knows...
+	   2016/06/27 16:00:21 http: panic serving 127.0.0.1:50816: runtime error: invalid memory address or nil pointer dereference
+	*/
+
+	/*
 		jar, err := cookiejar.New(nil)
 
 		if err != nil {
