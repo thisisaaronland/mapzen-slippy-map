@@ -10,7 +10,7 @@ import (
 	"golang.org/x/net/html"
 	"io"
 	"net/http"
-	"net/http/cookiejar"
+	_ "net/http/cookiejar"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -29,13 +29,14 @@ func NewTestRewriter() (*TestRewriter, error) {
 
 type TestRewriter struct {
 	HTMLRewriter
-	request *http.Request
+	Request *http.Request
 }
 
 func (t TestRewriter) SetKey(key string, value interface{}) error {
 
 	if key == "request" {
-		t.request = value.(*http.Request)
+		req := value.(*http.Request)
+		t.Request = req
 	}
 
 	return nil
@@ -43,15 +44,17 @@ func (t TestRewriter) SetKey(key string, value interface{}) error {
 
 func (t TestRewriter) Rewrite(node *html.Node, writer io.Writer) error {
 
-	jar, err := cookiejar.New(nil)
+	/*
+		jar, err := cookiejar.New(nil)
 
-	if err != nil {
-		return err
-	}
+		if err != nil {
+			return err
+		}
 
-	url := t.request.URL
-	cookies := jar.Cookies(url)
-	fmt.Println(cookies)
+		url := t.Request.URL
+		cookies := jar.Cookies(url)
+		fmt.Println(cookies)
+	*/
 
 	var f func(node *html.Node, writer io.Writer)
 
@@ -67,8 +70,6 @@ func (t TestRewriter) Rewrite(node *html.Node, writer io.Writer) error {
 			n.Attr = append(n.Attr, a)
 		}
 
-		html.Render(w, n)
-
 		for c := n.FirstChild; c != nil; c = c.NextSibling {
 			f(c, w)
 		}
@@ -76,6 +77,7 @@ func (t TestRewriter) Rewrite(node *html.Node, writer io.Writer) error {
 
 	f(node, writer)
 
+	html.Render(writer, node)
 	return nil
 }
 
@@ -102,8 +104,6 @@ func (h HTMLRewriteHandler) Handler(reader io.Reader) http.Handler {
 			http.Error(rsp, err.Error(), http.StatusInternalServerError)
 			return
 		}
-
-		fmt.Println(h.writer)
 
 		h.writer.SetKey("request", req)
 		h.writer.Rewrite(doc, rsp)
@@ -195,6 +195,7 @@ func main() {
 			}
 
 			handler := rewriter.Handler(reader)
+
 			handler.ServeHTTP(rsp, req)
 			return
 		}
