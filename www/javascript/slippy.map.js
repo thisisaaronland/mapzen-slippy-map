@@ -12,7 +12,7 @@ slippy.map = (function(){
 	var _styles = {
 		'bubble-wrap': 'tangram/bubble-wrap/bubble-wrap.yaml',
 		'cinnabar': 'tangram/cinnabar/cinnabar.yaml',
-		'outdoor': 'tangram/outdoor/outdoor.yaml',		
+		'walkabout': 'tangram/walkabout/walkabout.yaml',		
 		'refill': 'tangram/refill/refill.yaml',
 		'zinc': 'tangram/zinc/zinc.yaml',
 	};
@@ -378,10 +378,10 @@ slippy.map = (function(){
 				slippy.map.load_style(style);
 			}
 
-			// O is for outdoor
+			// O is for outdoor... which is now called walkabout
 
 			if (key == 79){
-				slippy.map.load_style('outdoor');
+				slippy.map.load_style('walkabout');
 			}	
 			
 			// R is for refill
@@ -408,7 +408,13 @@ slippy.map = (function(){
 					console.log(e);
 				}
 			}
+
+			// W is for walkabout
 			
+			if (key == 87){
+				slippy.map.load_style('walkabout');
+			}	
+
 			// Z is for zinc
 			
 			if (key == 90){
