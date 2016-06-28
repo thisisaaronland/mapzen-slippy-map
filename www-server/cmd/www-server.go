@@ -6,23 +6,18 @@ import (
 	"github.com/thisisaaronland/go-slippy-tiles"
 	slippy "github.com/thisisaaronland/go-slippy-tiles/provider"
 	"github.com/whosonfirst/go-httpony/cors"
+	"github.com/whosonfirst/go-httpony/rewrite"
 	"github.com/whosonfirst/go-httpony/tls"
 	"golang.org/x/net/html"
 	"io"
 	"net/http"
-	_ "net/http/cookiejar"
+	"net/http/cookiejar"
 	"os"
 	"path/filepath"
 	"regexp"
 )
 
-type HTMLRewriter interface {
-	Rewrite(node *html.Node, writer io.Writer) error
-	SetKey(key string, value interface{}) error
-}
-
 func NewTestRewriter() (*TestRewriter, error) {
-
 	t := TestRewriter{}
 	return &t, nil
 }
@@ -32,7 +27,7 @@ type TestRewriter struct {
 	Request *http.Request
 }
 
-func (t TestRewriter) SetKey(key string, value interface{}) error {
+func (t *TestRewriter) SetKey(key string, value interface{}) error {
 
 	if key == "request" {
 		req := value.(*http.Request)
@@ -42,24 +37,19 @@ func (t TestRewriter) SetKey(key string, value interface{}) error {
 	return nil
 }
 
-func (t TestRewriter) Rewrite(node *html.Node, writer io.Writer) error {
+func (t *TestRewriter) Rewrite(node *html.Node, writer io.Writer) error {
 
-	/*
-	   Basically trying to access any methods on t.Request results in the following error because... who knows...
-	   2016/06/27 16:00:21 http: panic serving 127.0.0.1:50816: runtime error: invalid memory address or nil pointer dereference
-	*/
+	jar, err := cookiejar.New(nil)
 
-	/*
-		jar, err := cookiejar.New(nil)
+	if err != nil {
+		return err
+	}
 
-		if err != nil {
-			return err
-		}
+	cookies := jar.Cookies(t.Request.URL)
 
-		url := t.Request.URL
-		cookies := jar.Cookies(url)
-		fmt.Println(cookies)
-	*/
+	if len(cookies) == 0 {
+
+	}
 
 	var f func(node *html.Node, writer io.Writer)
 
@@ -84,38 +74,6 @@ func (t TestRewriter) Rewrite(node *html.Node, writer io.Writer) error {
 
 	html.Render(writer, node)
 	return nil
-}
-
-type HTMLRewriteHandler struct {
-	writer HTMLRewriter
-}
-
-func NewHTMLRewriterHandler(writer HTMLRewriter) (*HTMLRewriteHandler, error) {
-
-	h := HTMLRewriteHandler{
-		writer: writer,
-	}
-
-	return &h, nil
-}
-
-func (h HTMLRewriteHandler) Handler(reader io.Reader) http.Handler {
-
-	fn := func(rsp http.ResponseWriter, req *http.Request) {
-
-		doc, err := html.Parse(reader)
-
-		if err != nil {
-			http.Error(rsp, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		h.writer.SetKey("request", req)
-		h.writer.Rewrite(doc, rsp)
-		return
-	}
-
-	return http.HandlerFunc(fn)
 }
 
 func main() {
@@ -151,7 +109,7 @@ func main() {
 	var re_html *regexp.Regexp
 
 	var provider slippytiles.Provider
-	var rewriter *HTMLRewriteHandler
+	var rewriter *rewrite.HTMLRewriteHandler
 
 	if *proxy_tiles {
 
@@ -173,7 +131,7 @@ func main() {
 	if *rewrite_html {
 
 		writer, _ := NewTestRewriter()
-		rewriter, _ = NewHTMLRewriterHandler(writer)
+		rewriter, _ = rewrite.NewHTMLRewriterHandler(writer)
 
 		re_html, _ = regexp.Compile(`/(?:.*).html$`)
 	}
