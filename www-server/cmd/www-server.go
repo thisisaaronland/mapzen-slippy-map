@@ -23,7 +23,7 @@ func NewTestRewriter() (*TestRewriter, error) {
 }
 
 type TestRewriter struct {
-	HTMLRewriter
+	rewrite.HTMLRewriter
 	Request *http.Request
 }
 
