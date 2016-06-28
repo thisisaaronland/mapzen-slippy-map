@@ -1,16 +1,19 @@
 package main
 
 import (
+        "encoding/json"
 	"flag"
 	"fmt"
 	"github.com/thisisaaronland/go-slippy-tiles"
 	slippy "github.com/thisisaaronland/go-slippy-tiles/provider"
-	"github.com/whosonfirst/go-httpony/cors"
+	"github.com/whosonfirst/go-httpony/cors"	
+	"github.com/whosonfirst/go-httpony/crypto"
 	"github.com/whosonfirst/go-httpony/rewrite"
 	"github.com/whosonfirst/go-httpony/tls"
 	"golang.org/x/net/html"
 	"golang.org/x/oauth2"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/http/cookiejar"
 	"os"
@@ -97,6 +100,8 @@ func main() {
 	var oauth_client = flag.String("oauth-client-id", "", "...")
 	var oauth_secret = flag.String("oauth-client-secret", "", "...")
 
+	var crypto_secret = flag.String("crypto-secret", "", "...")
+	
 	flag.Parse()
 
 	docroot, err := filepath.Abs(*path)
@@ -158,7 +163,15 @@ func main() {
 			// please do not hardcode me...
 
 			auth_url := "https://mapzen.com/oauth/authorize/"
-			token_url := "https://mapzen.com/oauth/request_token/"
+			token_url := "https://mapzen.com/oauth/token/"
+
+			scheme := "http"
+
+			if *tls_enable {
+				scheme = "https"
+			}
+
+			redirect_url := fmt.Sprintf("%s://%s/auth/", scheme, endpoint)
 
 			conf := &oauth2.Config{
 				ClientID:     *oauth_client,
@@ -168,21 +181,11 @@ func main() {
 					AuthURL:  auth_url,
 					TokenURL: token_url,
 				},
+				RedirectURL: redirect_url,
 			}
 
 			if re_signin.MatchString(path) {
-
-				scheme := "http"
-
-				if *tls_enable {
-					scheme = "https"
-				}
-
-				redir_uri := fmt.Sprintf("%s://%s/auth/", scheme, endpoint)
-
-				redir := oauth2.SetAuthURLParam("redirect_uri", redir_uri)
-
-				url := conf.AuthCodeURL("state", oauth2.AccessTypeOnline, redir)
+				url := conf.AuthCodeURL("state", oauth2.AccessTypeOnline)
 				http.Redirect(rsp, req, url, 302)
 				return
 			}
@@ -197,7 +200,6 @@ func main() {
 					return
 				}
 
-				fmt.Println(code)
 				token, err := conf.Exchange(oauth2.NoContext, code)
 
 				if err != nil {
@@ -205,7 +207,60 @@ func main() {
 					return
 				}
 
-				fmt.Println(token)
+				client := conf.Client(oauth2.NoContext, token)
+
+				r, err := client.Get("https://mapzen.com/developers/oauth_api/current_developer")
+
+				if err != nil {
+					http.Error(rsp, err.Error(), http.StatusInternalServerError)
+					return
+				}
+
+				defer r.Body.Close()
+				body, err := ioutil.ReadAll(r.Body)
+
+				if err != nil {
+					http.Error(rsp, err.Error(), http.StatusInternalServerError)
+					return
+				}
+				
+				type MapzenUser struct {
+				    Admin bool `json:"admin"`
+				    Keys string `json:"keys"`
+				    Id int32 `json:"id"`
+				    Email string `json:"email"`
+				    Nickname string `json:"nickname"`
+				}
+
+				user := MapzenUser{}
+				err = json.Unmarshal(body, &user)
+
+				if err != nil {
+					http.Error(rsp, err.Error(), http.StatusInternalServerError)
+					return
+				}
+
+				
+				crypto, err := crypto.NewCrypt(*crypto_secret)
+				t, err := crypto.Encrypt(token.AccessToken)
+
+				if err != nil {
+					http.Error(rsp, err.Error(), http.StatusInternalServerError)
+					return
+				}
+
+				b, err := crypto.Encrypt(string(body))
+
+				if err != nil {
+					http.Error(rsp, err.Error(), http.StatusInternalServerError)
+					return
+				}
+
+        			t_cookie := http.Cookie{Name: "t", Value: t, Expires: token.Expiry, Path: "/", HttpOnly: true, Secure: *tls_enable}
+        			b_cookie := http.Cookie{Name: "b", Value: b, Expires: token.Expiry, Path: "/", HttpOnly: true, Secure: *tls_enable}
+
+				http.SetCookie(rsp, &t_cookie)
+				http.SetCookie(rsp, &b_cookie)
 			}
 
 		}
@@ -232,6 +287,14 @@ func main() {
 			return
 		}
 
+		/*
+		t_cookie, _ := req.Cookie("t")
+
+		crypt, _ := crypto.NewCrypt(*crypto_secret)
+		token, _ := crypt.Decrypt(t_cookie.Value)		
+		fmt.Println(token)
+		*/
+		
 		fs.ServeHTTP(rsp, req)
 	}
 
