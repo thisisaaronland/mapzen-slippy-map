@@ -15,6 +15,7 @@ deps:
 	@GOPATH=$(shell pwd) go get -u "github.com/whosonfirst/go-httpony"
 	@GOPATH=$(shell pwd) go get -u "github.com/thisisaaronland/go-slippy-tiles"
 	@GOPATH=$(shell pwd) go get -u "golang.org/x/net/html"
+	@GOPATH=$(shell pwd) go get -u "golang.org/x/oauth2"
 
 bin:	self
 	@GOPATH=$(GOPATH) go build -o bin/www-server cmd/www-server.go

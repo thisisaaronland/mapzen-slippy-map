@@ -9,6 +9,7 @@ import (
 	"github.com/whosonfirst/go-httpony/rewrite"
 	"github.com/whosonfirst/go-httpony/tls"
 	"golang.org/x/net/html"
+	"golang.org/x/oauth2"
 	"io"
 	"net/http"
 	"net/http/cookiejar"
@@ -90,6 +91,12 @@ func main() {
 	var proxy_config = flag.String("proxy-config", "", "Path to a valid config file for slippy tiles.")
 	var rewrite_html = flag.Bool("rewrite-html", false, "...")
 
+	var oauth_enable = flag.Bool("oauth", false, "...")
+
+	// sudo read from a config file or env variable or something
+	var oauth_client = flag.String("oauth-client-id", "", "...")
+	var oauth_secret = flag.String("oauth-client-secret", "", "...")
+
 	flag.Parse()
 
 	docroot, err := filepath.Abs(*path)
@@ -110,6 +117,9 @@ func main() {
 
 	var provider slippytiles.Provider
 	var rewriter *rewrite.HTMLRewriteHandler
+
+	re_signin, _ := regexp.Compile(`/signin/?$`)
+	re_auth, _ := regexp.Compile(`/auth/?$`)
 
 	if *proxy_tiles {
 
@@ -140,6 +150,65 @@ func main() {
 
 		url := req.URL
 		path := url.Path
+
+		// https://godoc.org/golang.org/x/oauth2#example-Config
+
+		if *oauth_enable {
+
+			// please do not hardcode me...
+
+			auth_url := "https://mapzen.com/oauth/authorize/"
+			token_url := "https://mapzen.com/oauth/request_token/"
+
+			conf := &oauth2.Config{
+				ClientID:     *oauth_client,
+				ClientSecret: *oauth_secret,
+				Scopes:       []string{},
+				Endpoint: oauth2.Endpoint{
+					AuthURL:  auth_url,
+					TokenURL: token_url,
+				},
+			}
+
+			if re_signin.MatchString(path) {
+
+				scheme := "http"
+
+				if *tls_enable {
+					scheme = "https"
+				}
+
+				redir_uri := fmt.Sprintf("%s://%s/auth/", scheme, endpoint)
+
+				redir := oauth2.SetAuthURLParam("redirect_uri", redir_uri)
+
+				url := conf.AuthCodeURL("state", oauth2.AccessTypeOnline, redir)
+				http.Redirect(rsp, req, url, 302)
+				return
+			}
+
+			if re_auth.MatchString(path) {
+
+				query := req.URL.Query()
+				code := query.Get("code")
+
+				if code == "" {
+					http.Error(rsp, "Missing code parameter", http.StatusBadRequest)
+					return
+				}
+
+				fmt.Println(code)
+				token, err := conf.Exchange(oauth2.NoContext, code)
+
+				if err != nil {
+					http.Error(rsp, err.Error(), http.StatusBadRequest)
+					return
+				}
+
+				fmt.Println(token)
+			}
+
+		}
 
 		if *proxy_tiles && re_tile.MatchString(path) {
 			handler := provider.Handler()
