@@ -2,7 +2,7 @@ UNAME := $(shell sh -c 'uname -s  | awk "{print tolower($0)}" 2>/dev/null || ech
 
 all: mapzen screenful
 
-mapzen: tangram refill bubble-wrap cinnabar zinc outdoor
+mapzen: tangram refill bubble-wrap cinnabar zinc walkabout
 
 tangram:
 	curl -s -o www/javascript/tangram.js https://mapzen.com/tangram/tangram.debug.js
@@ -18,12 +18,12 @@ refill:
 	perl -p -i -e "s/images\/poi_icons_18\@2x.png/poi_icons_18\\@2x.png/" www/tangram/refill/refill-no-labels.yaml
 	perl -p -i -e "s/images\/building-grid.gif/building-grid.gif/" www/tangram/refill/refill-no-labels.yaml
 
-outdoor:
-	curl -s -o www/tangram/outdoor/outdoor.yaml https://raw.githubusercontent.com/tangrams/outdoor-style/gh-pages/outdoor-style.yaml
-	curl -s -o www/tangram/outdoor/poi_icons_18@2x.png https://raw.githubusercontent.com/tangrams/outdoor-style/gh-pages/images/poi_icons_18%402x.png
-	curl -s -o www/tangram/outdoor/draw-test9.jpg https://raw.githubusercontent.com/tangrams/outdoor-style/gh-pages/images/draw-test9.jpg
-	perl -p -i -e "s/images\/poi_icons_18\@2x.png/poi_icons_18\\@2x.png/" www/tangram/outdoor/outdoor.yaml
-	perl -p -i -e "s/images\/draw-test9.jpg/draw-test9.jpg/" www/tangram/outdoor/outdoor.yaml
+walkabout:
+	curl -s -o www/tangram/walkabout/walkabout.yaml https://raw.githubusercontent.com/tangrams/walkabout-style/gh-pages/walkabout-style.yaml
+	curl -s -o www/tangram/walkabout/poi_icons_18@2x.png https://raw.githubusercontent.com/tangrams/walkabout-style/gh-pages/images/poi_icons_18%402x.png
+	curl -s -o www/tangram/walkabout/draw-test9.jpg https://raw.githubusercontent.com/tangrams/walkabout-style/gh-pages/images/draw-test9.jpg
+	perl -p -i -e "s/images\/poi_icons_18\@2x.png/poi_icons_18\\@2x.png/" www/tangram/walkabout/walkabout.yaml
+	perl -p -i -e "s/images\/draw-test9.jpg/draw-test9.jpg/" www/tangram/walkabout/walkabout.yaml
 
 bubble-wrap:
 	curl -s -o www/tangram/bubble-wrap/bubble-wrap.yaml https://raw.githubusercontent.com/tangrams/bubble-wrap/gh-pages/bubble-wrap.yaml

@@ -114,15 +114,19 @@ Load the `cinnabar` style.
 
 ## Shift-L
 
-Toggles between labeled and unlabeled versions of the current style. _This is still a bit clunky and does not apply to the `bubble-wrap` or the `outdoor` styles._
+Toggles between labeled and unlabeled versions of the current style. _This is still a bit clunky and does not apply to the `bubble-wrap` or the `walkabout` styles._
 
 ## Shift-O
 
-Load the `outdoor` style.
+Load the `outdoor` style which is now called `walkabout`. This keyboard control is preserved for backwards compatibility.
 
 ## Shift-R
 
 Load the `refill` style.
+
+## Shift-W
+
+Load the `walkabout` style.
 
 ## Shift-Z
 
