@@ -1,22 +1,21 @@
 package main
 
 import (
-        "encoding/json"
+	"crypto/md5"
+	"encoding/hex"
 	"flag"
 	"fmt"
 	"github.com/thisisaaronland/go-slippy-tiles"
 	slippy "github.com/thisisaaronland/go-slippy-tiles/provider"
-	"github.com/whosonfirst/go-httpony/cors"	
+	"github.com/vaughan0/go-ini"
+	"github.com/whosonfirst/go-httpony/cors"
 	"github.com/whosonfirst/go-httpony/crypto"
 	"github.com/whosonfirst/go-httpony/rewrite"
 	"github.com/whosonfirst/go-httpony/tls"
-	"github.com/vaughan0/go-ini"
 	"golang.org/x/net/html"
 	"golang.org/x/oauth2"
 	"io"
-	"io/ioutil"
 	"net/http"
-	"net/http/cookiejar"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -30,6 +29,7 @@ func NewTestRewriter() (*TestRewriter, error) {
 type TestRewriter struct {
 	rewrite.HTMLRewriter
 	Request *http.Request
+	Secret  string
 }
 
 func (t *TestRewriter) SetKey(key string, value interface{}) error {
@@ -39,22 +39,14 @@ func (t *TestRewriter) SetKey(key string, value interface{}) error {
 		t.Request = req
 	}
 
+	if key == "secret" {
+		t.Secret = value.(string)
+	}
+
 	return nil
 }
 
 func (t *TestRewriter) Rewrite(node *html.Node, writer io.Writer) error {
-
-	jar, err := cookiejar.New(nil)
-
-	if err != nil {
-		return err
-	}
-
-	cookies := jar.Cookies(t.Request.URL)
-
-	if len(cookies) == 0 {
-
-	}
 
 	var f func(node *html.Node, writer io.Writer)
 
@@ -62,12 +54,24 @@ func (t *TestRewriter) Rewrite(node *html.Node, writer io.Writer) error {
 
 		if n.Type == html.ElementNode && n.Data == "body" {
 
-			ns := ""
-			key := "data-x-foo"
-			value := "bar"
+			t_cookie, _ := t.Request.Cookie("t")
 
-			a := html.Attribute{ns, key, value}
-			n.Attr = append(n.Attr, a)
+			crypt, _ := crypto.NewCrypt(t.Secret)
+			token, _ := crypt.Decrypt(t_cookie.Value)
+
+			token_ns := ""
+			token_key := "data-api-access-token"
+			token_value := token
+
+			token_attr := html.Attribute{token_ns, token_key, token_value}
+			n.Attr = append(n.Attr, token_attr)
+
+			endpoint_ns := ""
+			endpoint_key := "data-api-endpoint"
+			endpoint_value := "fix-me"
+
+			endpoint_attr := html.Attribute{endpoint_ns, endpoint_key, endpoint_value}
+			n.Attr = append(n.Attr, endpoint_attr)
 		}
 
 		for c := n.FirstChild; c != nil; c = c.NextSibling {
@@ -97,7 +101,7 @@ func main() {
 
 	var sso_enable = flag.Bool("sso", false, "...")
 	var sso_config = flag.String("sso-config", "", "...")
-		
+
 	flag.Parse()
 
 	docroot, err := filepath.Abs(*path)
@@ -116,11 +120,29 @@ func main() {
 	var re_tile *regexp.Regexp
 	var re_html *regexp.Regexp
 
+	var re_signin *regexp.Regexp
+	var re_auth *regexp.Regexp
+
 	var provider slippytiles.Provider
+
+	var writer *TestRewriter
 	var rewriter *rewrite.HTMLRewriteHandler
 
-	re_signin, _ := regexp.Compile(`/signin/?$`)
-	re_auth, _ := regexp.Compile(`/auth/?$`)
+	var sso_cfg ini.File
+
+	if *sso_enable {
+
+		re_signin, _ = regexp.Compile(`/signin/?$`)
+		re_auth, _ = regexp.Compile(`/auth/?$`)
+
+		sso_cfg, err = ini.LoadFile(*sso_config)
+
+		if err != nil {
+			panic(err)
+			return
+		}
+
+	}
 
 	if *proxy_tiles {
 
@@ -141,7 +163,7 @@ func main() {
 
 	if *rewrite_html {
 
-		writer, _ := NewTestRewriter()
+		writer, _ = NewTestRewriter()
 		rewriter, _ = rewrite.NewHTMLRewriterHandler(writer)
 
 		re_html, _ = regexp.Compile(`/(?:.*).html$`)
@@ -156,19 +178,10 @@ func main() {
 
 		if *sso_enable {
 
-			// please do this sooner...
-			
-			cfg, err := ini.LoadFile(*sso_config)
-			
-			if err != nil {
-				http.Error(rsp, err.Error(), http.StatusInternalServerError)
-				return			   
-			}
-
-			oauth_client, _ := cfg.Get("oauth", "client_id")
-			oauth_secret, _ := cfg.Get("oauth", "client_secret")
-			oauth_auth_url, _ := cfg.Get("oauth", "auth_url")
-			oauth_token_url, _ := cfg.Get("oauth", "token_url")			
+			oauth_client, _ := sso_cfg.Get("oauth", "client_id")
+			oauth_secret, _ := sso_cfg.Get("oauth", "client_secret")
+			oauth_auth_url, _ := sso_cfg.Get("oauth", "auth_url")
+			oauth_token_url, _ := sso_cfg.Get("oauth", "token_url")
 
 			scheme := "http"
 
@@ -212,40 +225,21 @@ func main() {
 					return
 				}
 
-				client := conf.Client(oauth2.NoContext, token)
+				// shrink to 32 characters
 
-				r, err := client.Get("https://mapzen.com/developers/oauth_api/current_developer")
+				hash := md5.New()
+				hash.Write([]byte(oauth_secret))
+				crypto_secret := hex.EncodeToString(hash.Sum(nil))
 
-				if err != nil {
-					http.Error(rsp, err.Error(), http.StatusInternalServerError)
-					return
-				}
+				writer.SetKey("secret", crypto_secret)
 
-				defer r.Body.Close()
-				body, err := ioutil.ReadAll(r.Body)
+				crypto, err := crypto.NewCrypt(crypto_secret)
 
 				if err != nil {
 					http.Error(rsp, err.Error(), http.StatusInternalServerError)
 					return
 				}
-				
-				type MapzenUser struct {
-				    Admin bool `json:"admin"`
-				    Keys string `json:"keys"`
-				    Id int32 `json:"id"`
-				    Email string `json:"email"`
-				    Nickname string `json:"nickname"`
-				}
 
-				user := MapzenUser{}
-				err = json.Unmarshal(body, &user)
-
-				if err != nil {
-					http.Error(rsp, err.Error(), http.StatusInternalServerError)
-					return
-				}
-				
-				crypto, err := crypto.NewCrypt(oauth_secret)
 				t, err := crypto.Encrypt(token.AccessToken)
 
 				if err != nil {
@@ -253,18 +247,11 @@ func main() {
 					return
 				}
 
-				b, err := crypto.Encrypt(string(body))
-
-				if err != nil {
-					http.Error(rsp, err.Error(), http.StatusInternalServerError)
-					return
-				}
-
-        			t_cookie := http.Cookie{Name: "t", Value: t, Expires: token.Expiry, Path: "/", HttpOnly: true, Secure: *tls_enable}
-        			b_cookie := http.Cookie{Name: "b", Value: b, Expires: token.Expiry, Path: "/", HttpOnly: true, Secure: *tls_enable}
-
+				t_cookie := http.Cookie{Name: "t", Value: t, Expires: token.Expiry, Path: "/", HttpOnly: true, Secure: *tls_enable}
 				http.SetCookie(rsp, &t_cookie)
-				http.SetCookie(rsp, &b_cookie)
+
+				http.Redirect(rsp, req, "/", 302)
+				return
 			}
 
 		}
@@ -291,14 +278,6 @@ func main() {
 			return
 		}
 
-		/*
-		t_cookie, _ := req.Cookie("t")
-
-		crypt, _ := crypto.NewCrypt(*crypto_secret)
-		token, _ := crypt.Decrypt(t_cookie.Value)		
-		fmt.Println(token)
-		*/
-		
 		fs.ServeHTTP(rsp, req)
 	}
 
