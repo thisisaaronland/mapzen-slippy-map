@@ -166,7 +166,7 @@ func main() {
 		writer, _ = NewTestRewriter()
 		rewriter, _ = rewrite.NewHTMLRewriterHandler(writer)
 
-		re_html, _ = regexp.Compile(`/(?:.*).html$`)
+		re_html, _ = regexp.Compile(`/(?:(?:.*).html)?$`)
 	}
 
 	juggler := func(rsp http.ResponseWriter, req *http.Request) {
@@ -178,10 +178,27 @@ func main() {
 
 		if *sso_enable {
 
+			// please check all of this sooner
+
 			oauth_client, _ := sso_cfg.Get("oauth", "client_id")
 			oauth_secret, _ := sso_cfg.Get("oauth", "client_secret")
 			oauth_auth_url, _ := sso_cfg.Get("oauth", "auth_url")
 			oauth_token_url, _ := sso_cfg.Get("oauth", "token_url")
+
+			// shrink to 32 characters
+
+			hash := md5.New()
+			hash.Write([]byte(oauth_secret))
+			crypto_secret := hex.EncodeToString(hash.Sum(nil))
+
+			crypto, err := crypto.NewCrypt(crypto_secret)
+
+			if err != nil {
+				http.Error(rsp, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			writer.SetKey("secret", crypto_secret)
 
 			scheme := "http"
 
@@ -225,21 +242,6 @@ func main() {
 					return
 				}
 
-				// shrink to 32 characters
-
-				hash := md5.New()
-				hash.Write([]byte(oauth_secret))
-				crypto_secret := hex.EncodeToString(hash.Sum(nil))
-
-				writer.SetKey("secret", crypto_secret)
-
-				crypto, err := crypto.NewCrypt(crypto_secret)
-
-				if err != nil {
-					http.Error(rsp, err.Error(), http.StatusInternalServerError)
-					return
-				}
-
 				t, err := crypto.Encrypt(token.AccessToken)
 
 				if err != nil {
@@ -265,6 +267,18 @@ func main() {
 		if *rewrite_html && re_html.MatchString(path) {
 
 			abs_path := filepath.Join(docroot, path)
+
+			info, err := os.Stat(abs_path)
+
+			if err != nil {
+				http.Error(rsp, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			if info.IsDir() {
+				abs_path = filepath.Join(abs_path, "index.html")
+			}
+
 			reader, err := os.Open(abs_path)
 
 			if err != nil {
