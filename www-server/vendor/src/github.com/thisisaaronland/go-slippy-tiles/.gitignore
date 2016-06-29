@@ -1,5 +1,0 @@
-*~
-pkg
-*.json
-src
-!vendor/src

@@ -18,6 +18,10 @@ deps:
 	@GOPATH=$(shell pwd) go get -u "golang.org/x/oauth2"
 	@GOPATH=$(shell pwd) go get -u "github.com/vaughan0/go-ini"
 
+vendor: rmdeps deps
+	if test -d vendor/src; then rm -rf vendor/src; fi
+	cp -r src vendor/src
+
 bin:	self
 	@GOPATH=$(GOPATH) go build -o bin/www-server cmd/www-server.go
 
