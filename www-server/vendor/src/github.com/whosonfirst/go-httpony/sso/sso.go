@@ -24,7 +24,7 @@ func NewSSORewriter(crypt *crypto.Crypt) (*SSORewriter, error) {
 type SSORewriter struct {
 	rewrite.HTMLRewriter
 	Request *http.Request
-	Crypto   *crypto.Crypt
+	Crypto  *crypto.Crypt
 }
 
 func (t *SSORewriter) SetKey(key string, value interface{}) error {
@@ -75,7 +75,7 @@ func (t *SSORewriter) Rewrite(node *html.Node, writer io.Writer) error {
 }
 
 type SSOProvider struct {
-	Crypto  *crypto.Crypt
+	Crypto *crypto.Crypt
 	Writer *SSORewriter
 	OAuth  *oauth2.Config
 }
@@ -113,7 +113,7 @@ func NewSSOProvider(sso_config string) (*SSOProvider, error) {
 	}
 
 	// oauth_api_url, ok := sso_cfg.Get("oauth", "api_url")
-	
+
 	// shrink to 32 characters
 
 	hash := md5.New()
@@ -146,7 +146,7 @@ func NewSSOProvider(sso_config string) (*SSOProvider, error) {
 	}
 
 	pr := SSOProvider{
-		Crypto:  crypt,
+		Crypto: crypt,
 		Writer: writer,
 		OAuth:  conf,
 	}
@@ -154,7 +154,7 @@ func NewSSOProvider(sso_config string) (*SSOProvider, error) {
 	return &pr, nil
 }
 
-func (s *SSOProvider) Handler(docroot string, tls_enable bool) http.HandlerFunc { // FIXME - put tls_enable somewhere better...
+func (s *SSOProvider) SSOHandler(next http.Handler, docroot string, tls_enable bool) http.Handler {
 
 	re_signin, _ := regexp.Compile(`/signin/?$`)
 	re_auth, _ := regexp.Compile(`/auth/?$`)
@@ -162,7 +162,7 @@ func (s *SSOProvider) Handler(docroot string, tls_enable bool) http.HandlerFunc 
 
 	rewriter, _ := rewrite.NewHTMLRewriterHandler(s.Writer)
 
-	f := func(rsp http.ResponseWriter, req *http.Request) {
+	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
 		url := req.URL
 		path := url.Path
@@ -232,8 +232,8 @@ func (s *SSOProvider) Handler(docroot string, tls_enable bool) http.HandlerFunc 
 			return
 		}
 
-		// FIXME - what about all the other files?
+		next.ServeHTTP(rsp, req)
 	}
 
-	return http.HandlerFunc(f)
+	return http.HandlerFunc(fn)
 }

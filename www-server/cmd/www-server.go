@@ -3,15 +3,14 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/thisisaaronland/go-slippy-tiles"
-	slippy "github.com/thisisaaronland/go-slippy-tiles/provider"
+	// "github.com/thisisaaronland/go-slippy-tiles"
+	// slippy "github.com/thisisaaronland/go-slippy-tiles/provider"
 	"github.com/whosonfirst/go-httpony/cors"
 	"github.com/whosonfirst/go-httpony/sso"
 	"github.com/whosonfirst/go-httpony/tls"	
 	"net/http"
 	"os"
 	"path/filepath"
-	"regexp"
 )
 
 func main() {
@@ -24,8 +23,8 @@ func main() {
 	var tls_enable = flag.Bool("tls", false, "Serve requests over TLS") // because CA warnings in browsers...
 	var tls_cert = flag.String("tls-cert", "", "Path to an existing TLS certificate. If absent a self-signed certificate will be generated.")
 	var tls_key = flag.String("tls-key", "", "Path to an existing TLS key. If absent a self-signed key will be generated.")
-	var proxy_tiles = flag.Bool("proxy", false, "Proxy and cache tiles locally.")
-	var proxy_config = flag.String("proxy-config", "", "Path to a valid config file for slippy tiles.")
+	// var proxy_tiles = flag.Bool("proxy", false, "Proxy and cache tiles locally.")
+	// var proxy_config = flag.String("proxy-config", "", "Path to a valid config file for slippy tiles.")
 
 	var sso_enable = flag.Bool("sso", false, "...")
 	var sso_config = flag.String("sso-config", "", "...")
@@ -39,29 +38,29 @@ func main() {
 	}
 
 	endpoint := fmt.Sprintf("%s:%d", *host, *port)
-
+	
 	root := http.Dir(docroot)
 	fs := http.FileServer(root)
 
-	handler := cors.EnsureCORSHandler(fs, *cors_enable, *cors_allow)
-
-	var re_tile *regexp.Regexp
-
-	var tiles_provider slippytiles.Provider
-
-	var sso_provider *sso.SSOProvider
-
+	handlers := make([]http.Handler, 0)
+	handlers = append(handlers, fs)
+	
 	if *sso_enable {
 
-		sso_provider, err = sso.NewSSOProvider(*sso_config)
+		sso_provider, err := sso.NewSSOProvider(*sso_config)
 
 		if err != nil {
 			panic(err)
 			return
 		}
 
+		last_handler := handlers[len(handlers) -1]
+		sso_handler := sso_provider.SSOHandler(last_handler, docroot, *tls_enable)
+
+		handlers = append(handlers, sso_handler)
 	}
 
+	/*
 	if *proxy_tiles {
 
 		config, err := slippytiles.NewConfigFromFile(*proxy_config)
@@ -76,36 +75,19 @@ func main() {
 			panic(err)
 		}
 
-		re_tile, _ = regexp.Compile(`/(.*)/(\d+)/(\d+)/(\d+).(\w+)$`)
-	}
-
-	juggler := func(rsp http.ResponseWriter, req *http.Request) {
-
-		url := req.URL
-		path := url.Path
-
-		// this is not quite right but I haven't wrapped my head around
-		// cascading handlers yet... (201606029/thisisaaronland)
-		
-		if *sso_enable {
-
-		   handler := sso_provider.Handler(docroot, *tls_enable)
-		   handler.ServeHTTP(rsp, req)
-		   return		   
-		}
+		re_tile, _ := regexp.Compile(`/(.*)/(\d+)/(\d+)/(\d+).(\w+)$`)
 
 		if *proxy_tiles && re_tile.MatchString(path) {
 			handler := tiles_provider.Handler()
 			handler.ServeHTTP(rsp, req)
 			return
 		}
-
-		fs.ServeHTTP(rsp, req)
 	}
+	*/
 
-	proxy := http.HandlerFunc(juggler)
+	last_handler := handlers[len(handlers)-1]
+	handler := cors.EnsureCORSHandler(last_handler, *cors_enable, *cors_allow)
 
-	handler = cors.EnsureCORSHandler(proxy, *cors_enable, *cors_allow)
 
 	if *tls_enable {
 
