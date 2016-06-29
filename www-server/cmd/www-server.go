@@ -10,6 +10,7 @@ import (
 	"github.com/whosonfirst/go-httpony/crypto"
 	"github.com/whosonfirst/go-httpony/rewrite"
 	"github.com/whosonfirst/go-httpony/tls"
+	"github.com/vaughan0/go-ini"
 	"golang.org/x/net/html"
 	"golang.org/x/oauth2"
 	"io"
@@ -94,14 +95,9 @@ func main() {
 	var proxy_config = flag.String("proxy-config", "", "Path to a valid config file for slippy tiles.")
 	var rewrite_html = flag.Bool("rewrite-html", false, "...")
 
-	var oauth_enable = flag.Bool("oauth", false, "...")
-
-	// sudo read from a config file or env variable or something
-	var oauth_client = flag.String("oauth-client-id", "", "...")
-	var oauth_secret = flag.String("oauth-client-secret", "", "...")
-
-	var crypto_secret = flag.String("crypto-secret", "", "...")
-	
+	var sso_enable = flag.Bool("sso", false, "...")
+	var sso_config = flag.String("sso-config", "", "...")
+		
 	flag.Parse()
 
 	docroot, err := filepath.Abs(*path)
@@ -158,12 +154,21 @@ func main() {
 
 		// https://godoc.org/golang.org/x/oauth2#example-Config
 
-		if *oauth_enable {
+		if *sso_enable {
 
-			// please do not hardcode me...
+			// please do this sooner...
+			
+			cfg, err := ini.LoadFile(*sso_config)
+			
+			if err != nil {
+				http.Error(rsp, err.Error(), http.StatusInternalServerError)
+				return			   
+			}
 
-			auth_url := "https://mapzen.com/oauth/authorize/"
-			token_url := "https://mapzen.com/oauth/token/"
+			oauth_client, _ := cfg.Get("oauth", "client_id")
+			oauth_secret, _ := cfg.Get("oauth", "client_secret")
+			oauth_auth_url, _ := cfg.Get("oauth", "auth_url")
+			oauth_token_url, _ := cfg.Get("oauth", "token_url")			
 
 			scheme := "http"
 
@@ -174,12 +179,12 @@ func main() {
 			redirect_url := fmt.Sprintf("%s://%s/auth/", scheme, endpoint)
 
 			conf := &oauth2.Config{
-				ClientID:     *oauth_client,
-				ClientSecret: *oauth_secret,
+				ClientID:     oauth_client,
+				ClientSecret: oauth_secret,
 				Scopes:       []string{},
 				Endpoint: oauth2.Endpoint{
-					AuthURL:  auth_url,
-					TokenURL: token_url,
+					AuthURL:  oauth_auth_url,
+					TokenURL: oauth_token_url,
 				},
 				RedirectURL: redirect_url,
 			}
@@ -239,9 +244,8 @@ func main() {
 					http.Error(rsp, err.Error(), http.StatusInternalServerError)
 					return
 				}
-
 				
-				crypto, err := crypto.NewCrypt(*crypto_secret)
+				crypto, err := crypto.NewCrypt(oauth_secret)
 				t, err := crypto.Encrypt(token.AccessToken)
 
 				if err != nil {
