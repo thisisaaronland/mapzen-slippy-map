@@ -10,6 +10,7 @@ import (
 	"golang.org/x/net/html"
 	"golang.org/x/oauth2"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -45,7 +46,13 @@ func (t *SSORewriter) Rewrite(node *html.Node, writer io.Writer) error {
 
 		if n.Type == html.ElementNode && n.Data == "body" {
 
-			t_cookie, _ := t.Request.Cookie("t")
+		   	 log.Println("HELLO")
+			 log.Println(t)
+			t_cookie, err := t.Request.Cookie("t")
+			log.Println(t_cookie)
+			log.Println(err)			
+
+			if err == nil {
 			token, _ := t.Crypto.Decrypt(t_cookie.Value)
 
 			token_ns := ""
@@ -61,6 +68,7 @@ func (t *SSORewriter) Rewrite(node *html.Node, writer io.Writer) error {
 
 			endpoint_attr := html.Attribute{endpoint_ns, endpoint_key, endpoint_value}
 			n.Attr = append(n.Attr, endpoint_attr)
+			}
 		}
 
 		for c := n.FirstChild; c != nil; c = c.NextSibling {
