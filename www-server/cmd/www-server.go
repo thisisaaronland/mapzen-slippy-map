@@ -47,7 +47,7 @@ func main() {
 
 	if *sso_enable {
 
-		sso_provider, err := sso.NewSSOProvider(*sso_config)
+		sso_provider, err := sso.NewSSOProvider(*sso_config, endpoint, docroot, *tls_enable)
 
 		if err != nil {
 			panic(err)
@@ -55,7 +55,7 @@ func main() {
 		}
 
 		last_handler := handlers[len(handlers)-1]
-		sso_handler := sso_provider.SSOHandler(last_handler, docroot, *tls_enable)
+		sso_handler := sso_provider.SSOHandler(last_handler)
 
 		handlers = append(handlers, sso_handler)
 	}
