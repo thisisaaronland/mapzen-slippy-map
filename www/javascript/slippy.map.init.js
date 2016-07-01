@@ -1,4 +1,4 @@
-window.onload = function(e){	
+window.addEventListener('load', function(e){
 
 	// defaults
 	
@@ -57,4 +57,4 @@ window.onload = function(e){
 	slippy.map.jumpto_latlon(lat, lon, zoom);
 	
 	
-}
+});
