@@ -186,7 +186,7 @@ slippy.map = (function(){
 					// pass
 				}
 
-				else if (style == 'outdoor'){
+				else if (style == 'walkabout'){
 					// pass
 				}
 
