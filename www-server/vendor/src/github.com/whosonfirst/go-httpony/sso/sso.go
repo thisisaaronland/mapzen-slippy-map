@@ -19,7 +19,7 @@ import (
 	"golang.org/x/net/html"
 	"golang.org/x/oauth2"
 	"io"
-	_ "log"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -56,15 +56,34 @@ func (t *SSORewriter) Rewrite(node *html.Node, writer io.Writer) error {
 
 		if n.Type == html.ElementNode && n.Data == "body" {
 
+		   	api_endpoint := ""
+			api_token := ""
+			api_ok := false
+			
 			t_cookie, err := t.Request.Cookie("t")
 
 			if err == nil {
-				cookie, _ := t.Crypto.Decrypt(t_cookie.Value)
 
-				stuff := strings.Split(cookie, "#")
+			       cookie, err := t.Crypto.Decrypt(t_cookie.Value)
 
-				api_endpoint := stuff[0]
-				api_token := stuff[1]
+				if err != nil {
+				   log.Printf("failed to decrypt cookie because %v\n", err)
+				} else {
+				  stuff := strings.Split(cookie, "#")
+
+				  if len(stuff) != 2 {
+				     log.Printf("failed to parse cookie - expected (2) parts and got %d\n", len(stuff))
+				  } else {
+
+				api_endpoint = stuff[0]
+				api_token = stuff[1]
+				api_ok = true
+				  }
+
+			}
+			}			
+
+			if api_ok {
 
 				token_ns := ""
 				token_key := "data-api-access-token"
@@ -111,36 +130,34 @@ func NewSSOProvider(sso_config string, endpoint string, docroot string, tls_enab
 		return nil, err
 	}
 
-	oauth_client, ok := sso_cfg.Get("oauth", "client_id")
+	required := []string{"client_id", "client_secret", "auth_url", "token_url", "api_url", "scopes"}
 
-	if !ok {
-		return nil, errors.New("Invalid client_id")
+	for _, key := range required {
+
+	    value, ok := sso_cfg.Get("oauth", key)
+
+	    if !ok {
+		return nil, errors.New(fmt.Sprintf("Invalid key %s", key))
+	    }
+
+	    if value == "" {
+		return nil, errors.New(fmt.Sprintf("Empty key %s", key))
+	    }
 	}
 
-	oauth_secret, ok := sso_cfg.Get("oauth", "client_secret")
+	oauth_client, _ := sso_cfg.Get("oauth", "client_id")
+	oauth_secret, _ := sso_cfg.Get("oauth", "client_secret")
+	oauth_auth_url, _ := sso_cfg.Get("oauth", "auth_url")
+	oauth_token_url, _ := sso_cfg.Get("oauth", "token_url")
+	oauth_api_url, _ := sso_cfg.Get("oauth", "api_url")
 
-	if !ok {
-		return nil, errors.New("Invalid client_secret")
+	oauth_scopes_str, _ := sso_cfg.Get("oauth", "scopes")
+	oauth_scopes := strings.Split(oauth_scopes_str, ",")
+
+	if len(oauth_scopes) == 0 {
+		return nil, errors.New("Missing scopes")	        
 	}
-
-	oauth_auth_url, ok := sso_cfg.Get("oauth", "auth_url")
-
-	if !ok {
-		return nil, errors.New("Invalid auth_url")
-	}
-
-	oauth_token_url, ok := sso_cfg.Get("oauth", "token_url")
-
-	if !ok {
-		return nil, errors.New("Invalid token_url")
-	}
-
-	oauth_api_url, ok := sso_cfg.Get("oauth", "api_url")
-
-	if !ok {
-		return nil, errors.New("Invalid api_url")
-	}
-
+	
 	// shrink to 32 characters
 
 	hash := md5.New()
@@ -168,7 +185,7 @@ func NewSSOProvider(sso_config string, endpoint string, docroot string, tls_enab
 	conf := &oauth2.Config{
 		ClientID:     oauth_client,
 		ClientSecret: oauth_secret,
-		Scopes:       []string{},
+		Scopes:       oauth_scopes,
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  oauth_auth_url,
 			TokenURL: oauth_token_url,
@@ -202,8 +219,18 @@ func (s *SSOProvider) SSOHandler(next http.Handler) http.Handler {
 		url := req.URL
 		path := url.Path
 
+		state := ""
+		
 		if re_signin.MatchString(path) {
-			url := s.OAuth.AuthCodeURL("state", oauth2.AccessTypeOnline)
+
+			_, err := req.Cookie("t")
+
+			if err == nil {
+			       	http.Redirect(rsp, req, "/", 302) // FIXME - do not simply redirect to /
+				return
+			}
+			
+			url := s.OAuth.AuthCodeURL(state, oauth2.AccessTypeOnline)
 			http.Redirect(rsp, req, url, 302)
 			return
 		}
@@ -218,13 +245,26 @@ func (s *SSOProvider) SSOHandler(next http.Handler) http.Handler {
 				return
 			}
 
-			token, err := s.OAuth.Exchange(oauth2.NoContext, code)
+			/*
 
+			for example:
+			
+			{
+				"access_token": "TOKEN",
+				"scope": "write",
+				"expires": 1467477951,
+				"expires_in": 79931
+			}
+
+			*/
+			
+			token, err := s.OAuth.Exchange(oauth2.NoContext, code)
+			
 			if err != nil {
 				http.Error(rsp, err.Error(), http.StatusBadRequest)
 				return
 			}
-
+			
 			stuff := []string{s.api_endpoint, token.AccessToken}
 			cookie := strings.Join(stuff, "#")
 
