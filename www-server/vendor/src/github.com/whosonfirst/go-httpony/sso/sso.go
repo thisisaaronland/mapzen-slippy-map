@@ -17,6 +17,7 @@ import (
 	"github.com/whosonfirst/go-httpony/crypto"
 	"github.com/whosonfirst/go-httpony/rewrite"
 	"golang.org/x/net/html"
+	"golang.org/x/net/html/atom"
 	"golang.org/x/oauth2"
 	"io"
 	"log"
@@ -37,6 +38,7 @@ type SSORewriter struct {
 	Request     *http.Request
 	Crypto      *crypto.Crypt
 	cookie_name string
+	scripts     []string
 }
 
 func (t *SSORewriter) SetKey(key string, value interface{}) error {
@@ -51,6 +53,11 @@ func (t *SSORewriter) SetKey(key string, value interface{}) error {
 		t.cookie_name = cookie_name
 	}
 
+	if key == "scripts" {
+		scripts := value.([]string)
+		t.scripts = scripts
+	}
+
 	return nil
 }
 
@@ -59,6 +66,31 @@ func (t *SSORewriter) Rewrite(node *html.Node, writer io.Writer) error {
 	var f func(node *html.Node, writer io.Writer)
 
 	f = func(n *html.Node, w io.Writer) {
+
+		if n.Type == html.ElementNode && n.Data == "head" {
+
+			if len(t.scripts) > 0 {
+
+				for c := n.FirstChild; c != nil; c = c.NextSibling {
+					f(c, w)
+				}
+
+				for _, src := range t.scripts {
+					script_type := html.Attribute{"", "type", "text/javascript"}
+					script_src := html.Attribute{"", "src", src}
+
+					script := html.Node{
+						Type:      html.ElementNode,
+						DataAtom:  atom.Script,
+						Data:      "script",
+						Namespace: "",
+						Attr:      []html.Attribute{script_type, script_src},
+					}
+
+					n.AppendChild(&script)
+				}
+			}
+		}
 
 		if n.Type == html.ElementNode && n.Data == "body" {
 
@@ -177,6 +209,14 @@ func NewSSOProvider(sso_config string, endpoint string, docroot string, tls_enab
 	cookie_name, _ := sso_cfg.Get("www", "cookie_name")
 	cookie_secret, _ := sso_cfg.Get("www", "cookie_secret")
 
+	scripts := make([]string, 0)
+
+	scripts_str, ok := sso_cfg.Get("www", "scripts")
+
+	if ok {
+		scripts = strings.Split(scripts_str, ",")
+	}
+
 	// shrink to 32 characters
 
 	hash := md5.New()
@@ -196,6 +236,7 @@ func NewSSOProvider(sso_config string, endpoint string, docroot string, tls_enab
 	}
 
 	writer.SetKey("cookie_name", cookie_name)
+	writer.SetKey("scripts", scripts)
 
 	redirect_url := fmt.Sprintf("http://%s/auth/", endpoint)
 
