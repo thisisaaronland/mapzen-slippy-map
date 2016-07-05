@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 func main() {
@@ -26,8 +27,11 @@ func main() {
 	var proxy_tiles = flag.Bool("proxy", false, "Proxy and cache tiles locally.")
 	var proxy_config = flag.String("proxy-config", "", "Path to a valid config file for slippy tiles.")
 
-	var sso_enable = flag.Bool("sso", false, "...")
-	var sso_config = flag.String("sso-config", "", "...")
+	var sso_enable = flag.Bool("sso", false, "Enable OAuth2 SSO provider hooks")
+	var sso_config = flag.String("sso-config", "", "The path to a valid SSO provider config file")
+
+	var inject_enable = flag.Bool("inject", false, "Enable HTML rewriting (specifically injecting new content)")
+	var inject_scripts = flag.String("inject-scripts", "", "A comma-separated list of scripts to inject in to HTML pages")
 
 	flag.Parse()
 
@@ -54,11 +58,39 @@ func main() {
 			return
 		}
 
+		/*
+			This is a stop-gap measure until the go-httpony rewrite handler
+			code is refactored to chain discrete HTML rewriting processes
+			(20160705/thisisaaronland)
+		*/
+
+		if *inject_enable {
+			scripts := strings.Split(*inject_scripts, ",")
+			sso_provider.Writer.SetKey("scripts", scripts)
+		}
+
 		last_handler := handlers[len(handlers)-1]
 		sso_handler := sso_provider.SSOHandler(last_handler)
 
 		handlers = append(handlers, sso_handler)
 	}
+
+	/* See notes above (20160705/thisisaaronland) */
+
+	/*
+		if *inject_enable {
+
+		   scripts := strings.Split(*inject_scripts, ",")
+
+		   writer, _ := inject.NewInjectRewriter(scripts)
+		   provider, _ := inject.NewInjectProvider(writer, docroot)
+
+		   last_handler := handlers[len(handlers)-1]
+		   inject_handler := provider.InjectHandler(last_handler)
+
+		   handlers = append(handlers, inject_handler)
+		}
+	*/
 
 	if *proxy_tiles {
 

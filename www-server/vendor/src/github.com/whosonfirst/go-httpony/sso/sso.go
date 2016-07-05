@@ -38,7 +38,7 @@ type SSORewriter struct {
 	Request     *http.Request
 	Crypto      *crypto.Crypt
 	cookie_name string
-	scripts     []string
+	scripts     []string // see notes in SSORewriter.Rewrite
 }
 
 func (t *SSORewriter) SetKey(key string, value interface{}) error {
@@ -53,7 +53,7 @@ func (t *SSORewriter) SetKey(key string, value interface{}) error {
 		t.cookie_name = cookie_name
 	}
 
-	if key == "scripts" {
+	if key == "scripts" { // see notes in SSORewriter.Rewrite
 		scripts := value.([]string)
 		t.scripts = scripts
 	}
@@ -68,6 +68,17 @@ func (t *SSORewriter) Rewrite(node *html.Node, writer io.Writer) error {
 	f = func(n *html.Node, w io.Writer) {
 
 		if n.Type == html.ElementNode && n.Data == "head" {
+
+			/*
+
+				See this? It shouldn't be here, really. It should be in the go-httponly/inject
+				package but I think that all of the rewrite handling code needs to be refactored
+				to better accomodate multiple disparate HTML rewriter handlers. Right now what
+				happens is that we end spewing duplicate HTML to the browser which results in
+				hilarity... So for now, we'll just hold our nose and do it the ugly way
+				(21060705/thisisaaronland)
+
+			*/
 
 			if len(t.scripts) > 0 {
 
@@ -209,14 +220,6 @@ func NewSSOProvider(sso_config string, endpoint string, docroot string, tls_enab
 	cookie_name, _ := sso_cfg.Get("www", "cookie_name")
 	cookie_secret, _ := sso_cfg.Get("www", "cookie_secret")
 
-	scripts := make([]string, 0)
-
-	scripts_str, ok := sso_cfg.Get("www", "scripts")
-
-	if ok {
-		scripts = strings.Split(scripts_str, ",")
-	}
-
 	// shrink to 32 characters
 
 	hash := md5.New()
@@ -236,7 +239,6 @@ func NewSSOProvider(sso_config string, endpoint string, docroot string, tls_enab
 	}
 
 	writer.SetKey("cookie_name", cookie_name)
-	writer.SetKey("scripts", scripts)
 
 	redirect_url := fmt.Sprintf("http://%s/auth/", endpoint)
 
