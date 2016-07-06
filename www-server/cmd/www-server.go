@@ -24,13 +24,14 @@ func main() {
 	var tls_enable = flag.Bool("tls", false, "Serve requests over TLS") // because CA warnings in browsers...
 	var tls_cert = flag.String("tls-cert", "", "Path to an existing TLS certificate. If absent a self-signed certificate will be generated.")
 	var tls_key = flag.String("tls-key", "", "Path to an existing TLS key. If absent a self-signed key will be generated.")
+
 	var proxy_tiles = flag.Bool("proxy", false, "Proxy and cache tiles locally.")
 	var proxy_config = flag.String("proxy-config", "", "Path to a valid config file for slippy tiles.")
 
-	var sso_enable = flag.Bool("sso", false, "Enable OAuth2 SSO provider hooks")
+	var sso_enable = flag.Bool("sso", false, "Enable OAuth2 single-sign-on (SSO) provider hooks")
 	var sso_config = flag.String("sso-config", "", "The path to a valid SSO provider config file")
 
-	var inject_enable = flag.Bool("inject", false, "Enable HTML rewriting (specifically injecting new content)")
+	var inject_enable = flag.Bool("inject", false, "Enable HTML rewriting by injecting custom content (experimental)")
 	var inject_scripts = flag.String("inject-scripts", "", "A comma-separated list of scripts to inject in to HTML pages")
 
 	flag.Parse()
