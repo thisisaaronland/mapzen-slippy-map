@@ -169,8 +169,10 @@ slippy.map = (function(){
 			
 			var scene = slippy.map.scene();
 			var sfile = self.scenefile(style, _labels)
-			scene.load(sfile);
 
+			console.log("load style (" + style + ") " + sfile);
+			
+			scene.load(sfile);
 			_current_style = style;
 		},
 
@@ -183,10 +185,6 @@ slippy.map = (function(){
 			if (! labels){
 
 				if (style == 'bubble-wrap'){
-					// pass
-				}
-
-				else if (style == 'walkabout'){
 					// pass
 				}
 

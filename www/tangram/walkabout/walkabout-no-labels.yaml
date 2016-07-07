@@ -1,48 +1,48 @@
 # Terrain environment map demo
 
 labels-global:
-    - &text_visible_continent         true
-    - &text_visible_island            true
-    - &text_visible_admin             true
-    - &text_visible_populated_places  true
-    - &icon_visible_populated_places  true
-    - &text_visible_neighbourhoods    true
-    - &text_visible_neighbourhoods_e  true
-    - &text_visible_building          true
-    - &text_visible_address           true
-    - &text_visible_water_labels      true
-    - &label_visible_landuse_green    true
+    - &text_visible_continent         false
+    - &text_visible_island            false
+    - &text_visible_admin             false
+    - &text_visible_populated_places  false
+    - &icon_visible_populated_places  false
+    - &text_visible_neighbourhoods    false
+    - &text_visible_neighbourhoods_e  false
+    - &text_visible_building          false
+    - &text_visible_address           false
+    - &text_visible_water_labels      false
+    - &label_visible_landuse_green    false
     - &icon_visible_landuse_green     false
-    - &text_visible_landuse_green     true
-    - &label_visible_poi_landuse      true
+    - &text_visible_landuse_green     false
+    - &label_visible_poi_landuse      false
     - &icon_visible_poi_landuse       false
     - &text_visible_poi_landuse       false
-    - &label_visible_poi_landuse_e    true
+    - &label_visible_poi_landuse_e    false
     - &icon_visible_poi_landuse_e     false
-    - &text_visible_poi_landuse_e     true
+    - &text_visible_poi_landuse_e     false
     - &label_visible_station          false
     - &icon_visible_station           false
     - &text_visible_station           false
-    - &text_visible_highway           true
+    - &text_visible_highway           false
     - &text_visible_highway_e         false
-    - &text_visible_trunk_primary     true
+    - &text_visible_trunk_primary     false
     - &text_visible_trunk_primary_e2  false
     - &text_visible_trunk_primary_e   false
-    - &text_visible_secondary         true
+    - &text_visible_secondary         false
     - &text_visible_secondary_e       false
-    - &text_visible_tertiary          true
+    - &text_visible_tertiary          false
     - &text_visible_tertiary_e        false
-    - &text_visible_minor_road        true
-    - &text_visible_minor_road_e      true
-    - &text_visible_service_road      true
-    - &text_visible_path              true
-    - &text_visible_piste             true
-    - &text_visible_steps             true
-    - &text_visible_aerialway         true
+    - &text_visible_minor_road        false
+    - &text_visible_minor_road_e      false
+    - &text_visible_service_road      false
+    - &text_visible_path              false
+    - &text_visible_piste             false
+    - &text_visible_steps             false
+    - &text_visible_aerialway         false
     - &text_visible_shields           false
-    - &text_visible_exits             true
+    - &text_visible_exits             false
     - &text_visible_exits_e           false
-    - &text_visible_airport_gate      true
+    - &text_visible_airport_gate      false
 
 settings:
     cameras:
@@ -406,7 +406,7 @@ sources:
     mapzen:
         type: TopoJSON
         # prod
-        url: https://vector.mapzen.com/osm/all/{z}/{x}/{y}.topojson?api_key=vector-tiles-VyYjZGS
+        url: https://vector.mapzen.com/osm/all/{z}/{x}/{y}.topojson?api_key=vector-tiles-2giCT1z
         # earlier prod version
         #url: https://vector.mapzen.com/osm/v0.9/all/{z}/{x}/{y}.topojson?api_key=vector-tiles-JUsa0Gc
         # dev
@@ -5649,9 +5649,9 @@ layers:
                 filter: { kind: [peak, volcano] }
                 draw:
                     icons:
-                        visible: *icon_visible_landuse_green
+                        visible: true
                         priority: 43
-                        text:  { visible: *text_visible_landuse_green }
+                        text:  { visible: true }
                 low-priority-early-z11:
                     filter: { kind_tile_rank: { min: 3 }, $zoom: [11,12] }
                     draw:
@@ -5674,8 +5674,8 @@ layers:
                 filter: { kind: [waterfall], $zoom: { max: 14 } }
                 draw:
                     icons:
-                        visible: *icon_visible_landuse_green
-                        text:  { visible: *text_visible_landuse_green }
+                        visible: true
+                        text:  { visible: true }
                 low-priority-early-z11:
                     filter: { kind_tile_rank: { min: 3 }, $zoom: [11,12] }
                     draw:

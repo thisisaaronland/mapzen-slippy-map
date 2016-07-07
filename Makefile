@@ -20,10 +20,18 @@ refill:
 
 walkabout:
 	curl -s -o www/tangram/walkabout/walkabout.yaml https://raw.githubusercontent.com/tangrams/walkabout-style/gh-pages/walkabout-style.yaml
+	curl -s -o www/tangram/walkabout/walkabout-no-labels.yaml https://raw.githubusercontent.com/tangrams/walkabout-style-no-labels/gh-pages/walkabout-style-no-labels.yaml
+	curl -s -o www/tangram/walkabout/building-grid.gif https://raw.githubusercontent.com/tangrams/walkabout-style/gh-pages/images/building-grid.gif
 	curl -s -o www/tangram/walkabout/poi_icons_18@2x.png https://raw.githubusercontent.com/tangrams/walkabout-style/gh-pages/images/poi_icons_18%402x.png
 	curl -s -o www/tangram/walkabout/draw-test9.jpg https://raw.githubusercontent.com/tangrams/walkabout-style/gh-pages/images/draw-test9.jpg
+
 	perl -p -i -e "s/images\/poi_icons_18\@2x.png/poi_icons_18\\@2x.png/" www/tangram/walkabout/walkabout.yaml
+	perl -p -i -e "s/images\/building-grid.gif/building-grid.gif/" www/tangram/walkabout/walkabout.yaml
 	perl -p -i -e "s/images\/draw-test9.jpg/draw-test9.jpg/" www/tangram/walkabout/walkabout.yaml
+
+	perl -p -i -e "s/images\/poi_icons_18\@2x.png/poi_icons_18\\@2x.png/" www/tangram/walkabout/walkabout-no-labels.yaml
+	perl -p -i -e "s/images\/building-grid.gif/building-grid.gif/" www/tangram/walkabout/walkabout-no-labels.yaml
+	perl -p -i -e "s/images\/draw-test9.jpg/draw-test9.jpg/" www/tangram/walkabout/walkabout-no-labels.yaml
 
 bubble-wrap:
 	curl -s -o www/tangram/bubble-wrap/bubble-wrap.yaml https://raw.githubusercontent.com/tangrams/bubble-wrap/gh-pages/bubble-wrap.yaml
