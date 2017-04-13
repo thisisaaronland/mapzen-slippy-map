@@ -25,11 +25,14 @@ slippy.map = (function(){
 	
     	var _custom_keyboard_events = null;
 
+	var _key = 'mapzen-XXXXXXX';	// mapzen.com/developers
+	
 	var self = {
 
-		'init': function(style){
+		'init': function(style, apikey){
 
 			_current_style = style;
+			_key = apikey;
 			
 			window.onresize = self.resize;
 			self.resize();
@@ -91,9 +94,15 @@ slippy.map = (function(){
 		'tangram': function(scene){
 
 			var style = self.style();
-			var scene = self.scenefile(style);
+			var _scenefile = self.scenefile(style);
 			
 			var tangram = Tangram.leafletLayer({
+				scene: {
+					import: _scenefile,
+					global: {
+						sdk_mapzen_api_key: _key
+					}
+				},				
 				scene: scene,
 				numWorkers: 2,
 				unloadInvisibleTiles: false,
@@ -466,7 +475,8 @@ slippy.map = (function(){
 			}
 
 			return _proxy_endpoint;
-		},
+		}
+		
 	};
 	
 	return self

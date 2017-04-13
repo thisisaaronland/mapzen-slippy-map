@@ -49,12 +49,11 @@ window.addEventListener('load', function(e){
 	
 	// go!
 
-	slippy.map.config.init();
+	var cfg = slippy.map.config.init();
 	
-	slippy.map.init(style);
+	slippy.map.init(style, cfg['api_key']);
 	window.onkeydown = slippy.map.onkeyboard;
 	
 	slippy.map.jumpto_latlon(lat, lon, zoom);
-	
 	
 });

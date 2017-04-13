@@ -11,16 +11,21 @@ slippy.map.config = (function(){
 	// JS which don't interact with one another beyond basic file
 	// serving) are set up correctly. It's not necessarily pretty
 	// but it works, so there you go... (20160606/thisisaaronland)
-	
-	var _proxy = false;
+
+	var _cfg = {
+		'api_key': 'mapzen-XXXXXX',	// https://www.mapzen.com/developers
+		'proxy': false,
+	};
 	
 	var self = {
 
 		'init': function(){
 
-			if (_proxy){
+			if (_cfg['proxy']){
 				slippy.map.enable_proxy();
 			}
+
+			return _cfg;
 		}
 	};
 
