@@ -279,10 +279,17 @@ slippy.map = (function(){
 			var scene = self.scene();
 			
 			if (! scene){
+				console.log("missing scene");
 				return false;
 			}
-			
-			scene.screenshot().then(on_screenshot);
+
+			try {
+				scene.screenshot().then(on_screenshot);
+			}
+
+			catch(e) {
+				console.log(e);
+			}
 			return false;
 		},
 
