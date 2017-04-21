@@ -6,7 +6,7 @@ slippy.map = (function(){
 
 	var _mapid = 'map';
 
-	var _current_style = 'bubble-wrap';
+	var _current_style = 'refill';
 	var _labels = true;
 	
 	var _styles = {
@@ -65,7 +65,6 @@ slippy.map = (function(){
 			
 			var map = self.map();
 			map.setView([ lat , lon ], zoom);
-			
 			return map;
 		},
 		
@@ -95,6 +94,9 @@ slippy.map = (function(){
 
 			var style = self.style();
 			var _scenefile = self.scenefile(style);
+
+			console.log(_scenefile);
+			console.log(_key);
 			
 			var tangram = Tangram.leafletLayer({
 				scene: {
@@ -103,7 +105,6 @@ slippy.map = (function(){
 						sdk_mapzen_api_key: _key
 					}
 				},				
-				scene: scene,
 				numWorkers: 2,
 				unloadInvisibleTiles: false,
 				updateWhenIdle: false,

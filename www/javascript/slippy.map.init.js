@@ -2,7 +2,7 @@ window.addEventListener('load', function(e){
 
 	// defaults
 	
-	var style = 'bubble-wrap';
+	var style = 'refill';
 
 	var lat = 37.755244;
 	var lon = -122.453098;
@@ -49,11 +49,17 @@ window.addEventListener('load', function(e){
 	
 	// go!
 
-	var cfg = slippy.map.config.init();
+	try {
+		var cfg = slippy.map.config.init();
+
+		slippy.map.init(style, cfg['api_key']);
+		window.onkeydown = slippy.map.onkeyboard;
 	
-	slippy.map.init(style, cfg['api_key']);
-	window.onkeydown = slippy.map.onkeyboard;
-	
-	slippy.map.jumpto_latlon(lat, lon, zoom);
-	
+		slippy.map.jumpto_latlon(lat, lon, zoom);
+	}
+
+	catch(e){
+		console.log("NO");
+		console.log(e);
+	}
 });
